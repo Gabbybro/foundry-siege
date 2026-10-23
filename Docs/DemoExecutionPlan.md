@@ -1,7 +1,7 @@
 # 射击肉鸽 · 首个战斗 Demo 执行计划
 
 日期：2026-10-24（Asia/Shanghai）  
-状态：用户于 2026-10-24 暂停各执行聊天，优先建立 Git 私有远程备份；Demo 模块尚未集成。
+状态：2026-10-24 已完成 Git 私有远程备份，按用户先备份再推进的安排恢复模块实施；Demo 尚未集成。
 工程：`D:\愤怒的小鸟`  
 战斗白皮书：[Google Docs](https://docs.google.com/document/d/1tCo9qlx488RquAvKMm83VkMvxZtScB7Zm0NyBGrwm3Y/edit?tab=t.0)
 
@@ -108,9 +108,10 @@
 - 基线：`5374abd`，保留原始安装验证工程与计划；已实际执行 `Tools/Unity.ps1 Setup` 成功。
 - 白皮书已读取并核对；第 10 节的建议按本计划第 2 节作为执行默认值，后续肉鸽提案不进入当前代码范围。
 - 锁定接口与文件归属：`Docs/DemoIntegrationContract.md`。
-- 战斗模块聊天：`01a16acb-332d-7c43-9096-a5371afb8511`，用户已暂停。
-- 配置模块聊天：`01a16acb-3819-7af3-88e3-eb30a59306d6`，用户已暂停。
-- 表现模块聊天：`01a16acb-3dde-7100-95fa-a79807116938`，用户已暂停。
+- 战斗模块聊天：`01a16acb-332d-7c43-9096-a5371afb8511`，备份后恢复实施。
+- 配置模块聊天：`01a16acb-3819-7af3-88e3-eb30a59306d6`，备份后恢复实施。
+- 表现模块聊天：`01a16acb-3dde-7100-95fa-a79807116938`，备份后恢复实施。
 - 管理者：已编写主流程、工厂、正式场景生成及新 Demo 的运行 smoke；待模块集成后编译、运行和修正，当前不视为已通过。
 - 正式目标：`Assets/Scenes/FoundryDemo.unity`、`Builds/Windows/FoundrySiege.exe`。原 InstallationCheck 保留。
 - Git：`main` 保留安装基线；`codex/demo-foundation` 保存暂停时的工作快照。该快照依赖尚未交付的模块，不能编译，不代表可玩版本。不要将其直接合入 main；集成通过后再合并。
+- 私有远程：https://github.com/Gabbybro/foundry-siege 。已实际推送并核对 `main=5374abd` 与开发快照 `3fdbced`；缓存、构建及安装包未入库。
