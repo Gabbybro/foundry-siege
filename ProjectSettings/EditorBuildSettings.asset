@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/InstallationCheck.unity
-    guid: 8a36440a2049fbe48914268fcbdf2488
+    path: Assets/Scenes/FoundryDemo.unity
+    guid: af97e441a03013c4884c1a29214fe43d
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

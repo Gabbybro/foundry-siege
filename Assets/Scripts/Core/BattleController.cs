@@ -30,6 +30,7 @@ namespace SiegeDemo
         public void Configure(TextAsset source, Camera camera) { levelSource = source; battleCamera = camera; }
         private void Start()
         {
+            Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
             Application.targetFrameRate = 60;
             if (!battleCamera) battleCamera = Camera.main;
             try { data = LevelConfiguration.Parse(levelSource.text); }
@@ -42,6 +43,7 @@ namespace SiegeDemo
             gameObject.AddComponent<DemoPresentation>().Configure(this, battleCamera);
             Restart();
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "-smokeTest") >= 0) gameObject.AddComponent<DemoSmokeRunner>();
+            else if (Array.IndexOf(Environment.GetCommandLineArgs(), "-solveTest") >= 0) gameObject.AddComponent<DemoAimSearch>();
             Debug.Log("DEMO_READY: " + data.name + " / Unity " + Application.unityVersion);
         }
         public void Restart()

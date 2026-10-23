@@ -59,6 +59,8 @@ public static class DemoSceneBuilder
         foreach (var root in scene.GetRootGameObjects()) foreach (var transform in root.GetComponentsInChildren<Transform>(true))
             if (GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(transform.gameObject) != 0) throw new InvalidOperationException("Missing script " + transform.name);
         DemoValidation.Run(data);
+        SiegeDemo.Editor.LevelConfigurationChecks.Run();
+        LevelRoundTripValidation.Run(data);
         Debug.Log("PROJECT_VALIDATION_SUCCESS");
     }
     [MenuItem("Siege Demo/Build/Windows")]
