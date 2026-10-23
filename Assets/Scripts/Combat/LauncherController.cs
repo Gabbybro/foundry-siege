@@ -98,7 +98,7 @@ namespace SiegeDemo
                 return;
             }
             // Allow the MouseUp event its frame; a lost release must never leave an armed drag.
-            if (dragging && !held && !Input.GetMouseButtonUp()) { CancelAim(); return; }
+            if (dragging && !held && !Input.GetMouseButtonUp(0)) { CancelAim(); return; }
             Vector2 pointer = Input.mousePosition;
             if (PointerBlocked(pointer) || !TryPointerWorld(pointer, out Vector2 pointerWorld))
             {

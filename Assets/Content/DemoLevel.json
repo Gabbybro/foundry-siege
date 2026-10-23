@@ -40,13 +40,13 @@
     {
       "id": "post",
       "kind": 0,
-      "size": { "x": 0.28, "y": 2.2 },
+      "size": { "x": 0.45, "y": 2.2 },
       "mass": 1.6,
       "hitPoints": 10.0,
       "impulseThreshold": 2.0,
       "damageMultiplier": 1.0,
       "friction": 0.7,
-      "bounciness": 0.02,
+      "bounciness": 0.0,
       "isStatic": false
     },
     {
@@ -58,7 +58,7 @@
       "impulseThreshold": 2.5,
       "damageMultiplier": 1.0,
       "friction": 0.7,
-      "bounciness": 0.02,
+      "bounciness": 0.0,
       "isStatic": false
     },
     {
