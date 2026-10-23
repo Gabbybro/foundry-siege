@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "name": "FOUNDRY / 01",
+  "ammunition": 3,
+  "launcher": { "x": -9.0, "y": -2.4 },
+  "killY": -8.0,
+  "minX": -20.0,
+  "maxX": 30.0,
+  "launch": {
+    "maxSpeed": 20.0,
+    "maxDrag": 2.3,
+    "cancelRatio": 0.15,
+    "mediumRatio": 0.4,
+    "heavyRatio": 0.7,
+    "minAngle": 5.0,
+    "maxAngle": 75.0,
+    "projectileMass": 3.0,
+    "projectileRadius": 0.32
+  },
+  "settlement": {
+    "minSeconds": 2.0,
+    "stableSeconds": 1.0,
+    "timeoutSeconds": 12.0,
+    "linearThreshold": 0.16,
+    "angularThreshold": 8.0
+  },
+  "parts": [
+    {
+      "id": "ground",
+      "kind": 2,
+      "size": { "x": 50.0, "y": 1.0 },
+      "mass": 1.0,
+      "hitPoints": 1000.0,
+      "impulseThreshold": 1000.0,
+      "damageMultiplier": 1.0,
+      "friction": 0.75,
+      "bounciness": 0.0,
+      "isStatic": true
+    },
+    {
+      "id": "post",
+      "kind": 0,
+      "size": { "x": 0.28, "y": 2.2 },
+      "mass": 1.6,
+      "hitPoints": 10.0,
+      "impulseThreshold": 2.0,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.02,
+      "isStatic": false
+    },
+    {
+      "id": "lintel",
+      "kind": 0,
+      "size": { "x": 2.4, "y": 0.28 },
+      "mass": 3.0,
+      "hitPoints": 12.0,
+      "impulseThreshold": 2.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.02,
+      "isStatic": false
+    },
+    {
+      "id": "armored-target",
+      "kind": 1,
+      "size": { "x": 0.95, "y": 1.2 },
+      "mass": 2.2,
+      "hitPoints": 8.0,
+      "impulseThreshold": 2.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false
+    }
+  ],
+  "objects": [
+    { "id": "floor", "partId": "ground", "position": { "x": 5.0, "y": -4.1 }, "rotation": 0.0 }
+  ],
+  "templates": [
+    {
+      "id": "guard-bay",
+      "objects": [
+        { "id": "left-post", "partId": "post", "position": { "x": -0.95, "y": 1.1 }, "rotation": 0.0 },
+        { "id": "right-post", "partId": "post", "position": { "x": 0.95, "y": 1.1 }, "rotation": 0.0 },
+        { "id": "roof", "partId": "lintel", "position": { "x": 0.0, "y": 2.34 }, "rotation": 0.0 },
+        { "id": "target", "partId": "armored-target", "position": { "x": 0.0, "y": 0.6 }, "rotation": 0.0 }
+      ]
+    }
+  ],
+  "structures": [
+    { "id": "bay-a", "templateId": "guard-bay", "position": { "x": 1.0, "y": -3.6 }, "rotation": 0.0 },
+    { "id": "bay-b", "templateId": "guard-bay", "position": { "x": 4.3, "y": -3.6 }, "rotation": 0.0 },
+    { "id": "bay-c", "templateId": "guard-bay", "position": { "x": 7.6, "y": -3.6 }, "rotation": 0.0 }
+  ]
+}
