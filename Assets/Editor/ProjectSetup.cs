@@ -38,6 +38,7 @@ namespace BirdReplica.EditorTools
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
             AssetDatabase.SaveAssets();
             Validate();
+            if (File.Exists(DemoSceneBuilder.ScenePath)) DemoSceneBuilder.Configure();
             Debug.Log("PROJECT_SETUP_SUCCESS");
         }
 

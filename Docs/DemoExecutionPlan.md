@@ -1,7 +1,7 @@
 # 射击肉鸽 · 首个战斗 Demo 执行计划
 
 日期：2026-10-24（Asia/Shanghai）  
-状态：已获准开始实施；由新建的项目管理对话接管任务分配、集成与交付。  
+状态：用户于 2026-10-24 暂停各执行聊天，优先建立 Git 私有远程备份；Demo 模块尚未集成。
 工程：`D:\愤怒的小鸟`  
 战斗白皮书：[Google Docs](https://docs.google.com/document/d/1tCo9qlx488RquAvKMm83VkMvxZtScB7Zm0NyBGrwm3Y/edit?tab=t.0)
 
@@ -102,3 +102,15 @@
 - Google Docs 已授权使用个人连接 `wxg371764020@gmail.com`，link ID 为 `link_6acad31ebf5c81918222412e7d4934e3`。再次访问该白皮书不需要重新询问账号；使用 Google Drive／Docs 技能与工具，在修改前读当前结构及 revision。
 
 本文件是本轮执行交接计划。新项目管理对话接管后维护此文件及执行状态，原设计对话不并行改动程序公共接口或发布另一套任务计划。
+
+## 9. 本轮执行记录
+
+- 基线：`5374abd`，保留原始安装验证工程与计划；已实际执行 `Tools/Unity.ps1 Setup` 成功。
+- 白皮书已读取并核对；第 10 节的建议按本计划第 2 节作为执行默认值，后续肉鸽提案不进入当前代码范围。
+- 锁定接口与文件归属：`Docs/DemoIntegrationContract.md`。
+- 战斗模块聊天：`01a16acb-332d-7c43-9096-a5371afb8511`，用户已暂停。
+- 配置模块聊天：`01a16acb-3819-7af3-88e3-eb30a59306d6`，用户已暂停。
+- 表现模块聊天：`01a16acb-3dde-7100-95fa-a79807116938`，用户已暂停。
+- 管理者：已编写主流程、工厂、正式场景生成及新 Demo 的运行 smoke；待模块集成后编译、运行和修正，当前不视为已通过。
+- 正式目标：`Assets/Scenes/FoundryDemo.unity`、`Builds/Windows/FoundrySiege.exe`。原 InstallationCheck 保留。
+- Git：`main` 保留安装基线；`codex/demo-foundation` 保存暂停时的工作快照。该快照依赖尚未交付的模块，不能编译，不代表可玩版本。不要将其直接合入 main；集成通过后再合并。

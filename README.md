@@ -1,5 +1,7 @@
 # 愤怒的小鸟复刻项目
 
+> `codex/demo-foundation` 分支是 2026-10-24 暂停时的 Demo 开发快照。流程框架已写，Combat、Configuration、Presentation 模块尚未落盘，当前快照不能编译。已通过 Setup 的安装基线在 `main` 的 `5374abd`；以下安装说明描述该基线，不代表 Demo 已完成。Git 约定见 `Docs/GitWorkflow.md`。
+
 开发环境：Unity **6.3 LTS / 6000.3.27f1**，C#，Built-In 渲染管线，2D 物理。首个验证平台为 Windows 64 位，使用 Mono 后端。
 
 当前是项目初始化和安装验证阶段，尚不是完整游戏。`Assets/Scenes/InstallationCheck.unity` 是环境测试场景：点击 **Launch bird** 发射红色圆形小鸟，撞击木块；点击 **Reset scene** 重置。场景中的图形是程序生成的占位素材。

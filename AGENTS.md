@@ -9,4 +9,6 @@
 - Run `pwsh -File Tools/Unity.ps1 Build` then `pwsh -File Tools/Unity.ps1 Smoke` for a Windows build and an actual runtime physics/collision check.
 - Close the Editor for this project before batch commands; do not run two Unity processes on one project.
 - Logs, builds, package caches, and installers are ignored by Git. Never commit `.setup`, `Library`, `Logs`, or `Builds`.
+- Git integration is owned by the project manager while execution chats share this checkout. Module chats must not switch branches, merge, reset, or push this shared repository.
+- Keep `main` at validated milestones. Save incomplete work on `codex/` branches with an explicit WIP commit and validation status. Push milestones to the configured private `origin`; do not force-push or rewrite shared history.
 - The default Editor executable is `D:\Program Files\Unity\Hub\Editor\6000.3.27f1\Editor\Unity.exe`; the script accepts `-EditorPath` for other installations.
