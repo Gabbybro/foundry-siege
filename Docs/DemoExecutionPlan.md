@@ -1,7 +1,7 @@
 # 射击肉鸽 · 首个战斗 Demo 执行计划
 
 日期：2026-10-24（Asia/Shanghai）  
-状态：2026-10-24 已完成 Git 私有远程备份，按用户先备份再推进的安排恢复模块实施；Demo 尚未集成。
+状态：2026-10-24 首个可玩 Demo 已交付；最终 Validate、Windows Build、实际玩家 Smoke 与鼠标三发通关通过，ZIP 已生成，版本标记 demo-v0.1。
 工程：`D:\愤怒的小鸟`  
 战斗白皮书：[Google Docs](https://docs.google.com/document/d/1tCo9qlx488RquAvKMm83VkMvxZtScB7Zm0NyBGrwm3Y/edit?tab=t.0)
 
@@ -108,10 +108,10 @@
 - 基线：`5374abd`，保留原始安装验证工程与计划；已实际执行 `Tools/Unity.ps1 Setup` 成功。
 - 白皮书已读取并核对；第 10 节的建议按本计划第 2 节作为执行默认值，后续肉鸽提案不进入当前代码范围。
 - 锁定接口与文件归属：`Docs/DemoIntegrationContract.md`。
-- 战斗模块聊天：`01a16acb-332d-7c43-9096-a5371afb8511`，备份后恢复实施。
-- 配置模块聊天：`01a16acb-3819-7af3-88e3-eb30a59306d6`，备份后恢复实施。
-- 表现模块聊天：`01a16acb-3dde-7100-95fa-a79807116938`，备份后恢复实施。
-- 管理者：已编写主流程、工厂、正式场景生成及新 Demo 的运行 smoke；待模块集成后编译、运行和修正，当前不视为已通过。
+- 战斗模块聊天：`01a16acb-332d-7c43-9096-a5371afb8511`，已交付、集成并运行验证。
+- 配置模块聊天：`01a16acb-3819-7af3-88e3-eb30a59306d6`，已交付，真实 JsonUtility 与场景载入/保存回归已通过。
+- 表现模块聊天：`01a16acb-3dde-7100-95fa-a79807116938`，已交付，中文 HUD 与工业造型已实机检查。
+- 管理者：已完成流程、场景、自动检查、Windows 构建与实机验证；修复了快速拖拽起点丢失和重开后结构自行倾倒。最终测试覆盖普通胜负、末发后获胜、超时、重开与支撑稳定，详见 `Docs/DemoDelivery.md`。
 - 正式目标：`Assets/Scenes/FoundryDemo.unity`、`Builds/Windows/FoundrySiege.exe`。原 InstallationCheck 保留。
-- Git：`main` 保留安装基线；`codex/demo-foundation` 保存暂停时的工作快照。该快照依赖尚未交付的模块，不能编译，不代表可玩版本。不要将其直接合入 main；集成通过后再合并。
+- Git 历史：`5374abd` 是安装基线，`3fdbced` 是当时不能编译的暂停快照；开发分支后续已完成模块与集成，最终通过版本合入 main 并标记 `demo-v0.1`。
 - 私有远程：https://github.com/Gabbybro/foundry-siege 。已实际推送并核对 `main=5374abd` 与开发快照 `3fdbced`；缓存、构建及安装包未入库。

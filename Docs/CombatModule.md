@@ -2,6 +2,8 @@
 
 日期：2026-10-24（Asia/Shanghai）。状态：代码与独立托管检查完成，Unity 集成与 Windows 实机检查由管理聊天统一执行。本模块没有启动 Unity、生成场景、改公共接口或执行 Git 写操作。
 
+集成更新：管理者已完成实际 Unity 编译、Windows 物理 Smoke 和窗口鼠标试射，详见 `Docs/DemoDelivery.md`。快速拖拽现在通过 OnGUI 原始鼠标事件的位置发起和结束手势，Update 只负责连续预览与取消检查，避免轮询下压帧丢失起点；`-inputTrace` 可记录按键、焦点和事件坐标，仅用于诊断。下文“待 Unity 检查”保留模块交付时状态，最终结果以总交付记录为准。
+
 ## 文件与依赖
 
 - `Assets/Scripts/Combat/LauncherController.cs`：反向拖拽、三档解算、输入保护、短轨迹。
