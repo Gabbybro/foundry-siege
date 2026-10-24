@@ -21,6 +21,9 @@ namespace SiegeDemo
         public Vector2 size = Vector2.one;
         public float mass = 1, hitPoints = 12, impulseThreshold = 2, damageMultiplier = 1, friction = .65f, bounciness = .05f;
         public bool isStatic;
+        // v1 omits these fields; Legacy retains the original platform/static behaviour.
+        public MaterialId material;
+        public bool isGround, indestructible;
     }
     [Serializable] public class Placement
     {
@@ -33,6 +36,7 @@ namespace SiegeDemo
     [Serializable] public class LevelData
     {
         public int version = 1;
+        public string id;
         public string name = "FOUNDRY / 01";
         public int ammunition = 3;
         public Vector2 launcher = new Vector2(-9, -2.4f);

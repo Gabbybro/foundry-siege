@@ -1,5 +1,44 @@
 # Demo 集成契约（2026-10-24）
 
+## v0.2 当前契约（优先于下方 v0.1 历史）
+
+公共类型以 `Assets/Scripts/Core/DemoContracts.cs`、`RoguelikeContracts.cs`、`PartSurface.cs` 为准，管理者独占。M0 已实际运行 `pwsh -File Tools/Unity.ps1 Validate`，通过旧配置读写、编译与引用检查；不代表新能力完成。当前开发分支 `codex/roguelike-demo`；v0.1 标签和旧包保留。
+
+### 数据约定
+
+- 保留 BattleState/PartKind 旧枚举值。PartDefinition 新增 material（MaterialId：Legacy=0、Wood=1、Glass=2、Stone=3、Metal=4）、isGround、indestructible；isStatic 只决定是否固定。Legacy 沿用 v1 静态/Platform 不可破坏与 Platform 地面语义，新显式材质不依赖名称推断。LevelData 新增 id，旧 v1 可省略，v2 必填。
+- 工厂为所有构件（含固定构件）添加 PartSurface.Initialize(part)。新材质的固定可破坏体也应有 DamageableBody，无 Rigidbody2D 即静态；不可破坏体可动态。DamageableBody.Initialize 内按 PartSurface 相同兼容公式判定不可破坏，静止承重继续由接近速度过滤。
+- 能力数值唯一入口 AbilitySettings，各字段说明见源码；split.spreadAngle 为中线到单侧角，shards.spreadAngle 为两破片的总夹角。质量守恒、3 子弹与 2 破片是规则，不改为数量参数。石面角度从表面切线算，0 擦撞/90 正撞。RadialEffect 衰减为 pow(clamp01(1-distance/radius),falloffPower)。
+- B 提供 `RunConfiguration.Parse(string) -> RunConfigurationData`、`Validate(RunConfigurationData) -> List<string>`、`Serialize(RunConfigurationData) -> string`，沿用严格 JSON 门禁；顶层能力参数文件 `Assets/Content/RunConfiguration.json`，九关 `Assets/Content/Levels/C01.json` 至 C05/P01 至 P04。campaignLevels 顺序引用 LevelData.id；practice.build 为默认构筑，允许练习入口重选。保留旧 DemoLevel.json。
+- 所有枚举用 JSON 整数；B 校验未知 ID、数值有限及范围、正式路线和练习唯一性、材质字段，保留旧 v1 读写。新 v2 不许漏掉显式材质/ground/indestructible（门禁需要区分版本）。
+
+### A 战斗接入
+
+- A 提供 `CombatRuntime : MonoBehaviour, ICombatRuntime`，接口、CombatContext、ShotContext、DamageSource、CombatEvent 已定义。管理者每关先 EndShot、generation++、DamageableBody.ResetSession、重建工厂，再 Configure(context)。BeginShot 在原弹设为 Dynamic 并赋初速度后调用。root 负责弹药、关卡边界、装填/超时、奖励。
+- Configure 清除旧 generation 的回调/队列；订阅该 world 的 DamageableBody 破坏，支持链式冲击。EndShot 清除本发原弹/子弹/破片/待触发能力，不移除构件，不产生替换/超时爆炸。ActiveProjectiles 排除装填弹；HasUnsettledEffects 包含运动弹体、支撑未停稳、停驻倒计时和未执行效果，不能因空中顶点低速误判已结算。
+- 每个原始发射用独立 ShotContext，activeUsed/shardsUsed 整发共享；A 自行实现 CombatProjectile 保存 projectileId/ProjectileKind 与独立穿木、反弹、石面、俯冲状态，并公开只读属性供真实运行检查。分裂子弹无新主动，破片不继承但伤敌能死亡冲击。测试可读取 CurrentShot 和实体只读状态，不能加运行时作弊入口。
+- 原弹由 root 创建并已有 ProjectileProbe，A 给它挂能力组件；分裂/破片由 A 创建，调用 context.onProjectileCreated(go,kind) 由 root 装饰。A 不调用 Presentation；视觉通过 onEvent 回调送 CombatEvent，必须带 generation/shotId。
+- DamageableBody 保留现有 API，新增 `ApplyDirectDamage(float amount, DamageSource source)` 和 `LastDamageSource`，撞击可增重载传来源。Eliminate 明确 Boundary；旧 ApplyImpact 仍表示普通碰撞。撞击去重→一次普通伤害→穿木/反弹→已发生破坏/死亡效果，链效果用有界队列，先快照遮挡/范围再伤害，最后推幸存者。
+- LauncherController 负责新主动指针输入和 Escape 暂停。会话可 cast 到 IRunSession；启动主动必须是发射之后的新 MouseDown，绝不能在同一 MouseUp 误触发。保留已修好的 OnGUI 原始事件坐标方式。每次交互调用 IsPointerBlocked；纯界面弹窗或非 Battle 阶段不可发射。暂停/重试/失焦取消手势。
+- A 可创建 `Assets/Scripts/Combat/Validation/CombatRegression.cs`，提供 `public static IEnumerator Run(BattleController battle)`（内部失败抛 InvalidOperationException）供管理者接入 runtime smoke；不得依赖尚未约定的 root 私有成员，不启动 Unity。
+
+### C 界面接入
+
+- IRunSession 扩展 IBattleSession。Phase 区分菜单/选主动/战斗/奖励/整轮完成/练习完成；BattleState 保留单关状态，IsPaused 独立。LevelIndex 为 0 起算，UI 显示 +1；LevelCount 正式 5，练习 1；Build/RewardChoices/Practices 返回只读用途的数据快照。
+- 命令 StartCampaign→ActiveSelection；SelectActive→C01；SelectReward→下一关；StartPractice(levelId,active,passives) 使用用户选择的构筑。RetryLevel 恢复入场快照；RestartRun 回主动选择并清空构筑；ReturnToMenu 放弃当前轮。菜单/失败提供两种重试，放弃/整轮重开由 C 清楚提示，管理者不弹第二份确认。
+- HUD 每帧 SetUiBlockingRects(Rect[])，矩形为 GUI 左上坐标；root 的 IsPointerBlocked 输入为 Unity 左下屏幕坐标并检查 Phase/暂停。中心模态对话必须挡全屏，不依赖 OnGUI 执行顺序防误射。新增反馈订阅 CombatFeedback，显示 CanUseActive、ActiveProjectiles、Feedback。TryUseActive 参数是世界坐标，由 A Launcher 输入转化，HUD 不重复发主动。
+- 保留现有 DemoPresentation 静态 API，新增可选 `DecorateProjectile(GameObject,ProjectileKind)` 重载可由 root 调用；不改变物理、伤害或参数。材质视觉读取 PartDefinition.material，保持工业风。
+
+### 所有权与阶段交付
+
+A 仅 Combat/、Docs/CombatModule.md；B 仅 Configuration/、Editor/LevelAuthoring/、Content/、Docs/LevelConfiguration.md；C 仅 Presentation/、Art/Demo/、Docs/PresentationModule.md。root 独占其余共享文件、编辑器/构建/测试/Git。M0 为旧配置兼容调整的 ConfigurationJson 已完成，派发后归 B。文件变动先说明，不能跨边界修他人代码。
+
+第一批先接两主动、C01/P01 和新 HUD，尽快实际构建；后续补齐七被动、九关与完整反馈。模块完成后写清已实现、静态检查和待 root 实测，不以未运行结果写通过。root 主动 wait_threads 取结果，不要求模块回发消息。
+
+---
+
+## v0.1 历史契约
+
 公共命名空间 `SiegeDemo`，类型已在 `Assets/Scripts/Core/DemoContracts.cs` 实现，仅管理者改动。所有执行聊天共用当前目录，无 worktree；不启动 Unity、不修改公共文件、不提交其他人的文件。各模块先读 AGENTS.md 与 DemoExecutionPlan.md。基线提交 5374abd。
 
 ## 文件归属与 API

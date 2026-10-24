@@ -83,6 +83,8 @@ namespace SiegeDemo
                 // Top-level optional lists can be omitted. All scalar settings and
                 // placement vectors are explicit to avoid JsonUtility default ambiguity.
                 bool optional = expected == typeof(LevelData) && member.FieldType.IsArray && member.Name != "parts";
+                optional |= expected == typeof(LevelData) && member.Name == "id";
+                optional |= expected == typeof(PartDefinition) && (member.Name == "material" || member.Name == "isGround" || member.Name == "indestructible");
                 if (!optional && !seen.Contains(member.Name)) Fail(path + "." + member.Name, "缺少必填字段");
             }
         }
