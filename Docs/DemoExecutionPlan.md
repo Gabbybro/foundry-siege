@@ -1,7 +1,7 @@
 # 射击肉鸽 · 首个战斗 Demo 执行计划
 
 日期：2026-10-24（Asia/Shanghai）  
-当前阶段：2026-10-24 转入新策划案前四章的需求对齐，暂停新增实现与任务派发；待用户明确对齐完成并恢复执行。已交付的 demo-v0.1、仓库和 ZIP 保留，不回退。
+当前阶段：2026-10-24 用户已明确恢复实现与多对话任务派发。当前执行以 `Docs/RoguelikeDemoExecutionPlan.md` 和 `Docs/CombatWhitepaperSnapshot.md` 为准；本文件保留 v0.1 与需求暂停的历史记录，其中单关/无主动等旧范围不适用于本轮。已交付的 demo-v0.1、仓库和 ZIP 保留，不回退。
 工程：`D:\愤怒的小鸟`  
 战斗白皮书：[Google Docs](https://docs.google.com/document/d/1tCo9qlx488RquAvKMm83VkMvxZtScB7Zm0NyBGrwm3Y/edit?tab=t.0)
 
@@ -122,4 +122,4 @@
 - 新案来源：https://docs.google.com/document/d/1TGUVyc6nMf5nF9yWr3aoB7BZZwU_YUb2lbiOyc84U0E/edit?tab=t.0 。此处只记录来源，不将文中提案直接视为已确认规则。
 - 设计对话 `01a16a3d-b490-7cd3-bfb6-50264b2ce62e` 负责逐轮讨论与白皮书维护；管理对话不并行改写战斗规则、不新增实现或派发任务。
 - 保留交付基线 `demo-v0.1`（`6c8bed6`）与现有构建包；三个模块执行聊天均已完成，当前无在途实现任务。
-- 恢复条件：用户明确确认需求已对齐并恢复执行，届时由管理对话重新整理差异、拆分任务与验收。
+- 恢复条件已满足：用户于 2026-10-24 明确要求“做成可执行的计划按之前的流程给其他对话执行”。本节的暂停限制已解除；后续由管理聊天按 `Docs/RoguelikeDemoExecutionPlan.md` 接管实施，原文作为阶段历史保留。

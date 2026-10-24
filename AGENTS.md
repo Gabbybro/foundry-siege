@@ -2,8 +2,9 @@
 
 ## Current phase — 2026-10-24
 
-- Requirements alignment only. The user requested full agreement on chapters 1–4 of the new design before implementation. Do not start new implementation, builds, or task dispatch until the user explicitly confirms alignment and resumes execution.
-- Preserve the delivered `demo-v0.1` and repository history; do not roll back existing work. The design chat `01a16a3d-b490-7cd3-bfb6-50264b2ce62e` owns the ongoing requirements discussion and battle whitepaper updates. New roguelike or active-skill proposals are not approved implementation tasks.
+- Implementation resumed by explicit user instruction: “可以，做成可执行的计划按之前的流程给其他对话执行吧”. The approved baseline includes two actives, seven passives, a five-stage run, four standalone practice levels, and both retry-current-level and restart-run. Follow `Docs/RoguelikeDemoExecutionPlan.md` and `Docs/CombatWhitepaperSnapshot.md`; the previous requirements-only pause is lifted.
+- Preserve delivered `demo-v0.1` and repository history. Project manager chat `01a16ac7-c334-7993-a5a3-82a5836f95ab` owns task dispatch, shared contracts, integration, Git, Unity processes, validation and delivery. Design chat `01a16a3d-b490-7cd3-bfb6-50264b2ce62e` owns design explanations and the battle whitepaper; it must not become a second implementation dispatcher.
+- The source planning document `1TGUVyc6nMf5nF9yWr3aoB7BZZwU_YUb2lbiOyc84U0E` is strictly read-only: no content, formatting or comment writes. Design supplements belong only in the authorized battle whitepaper `1tCo9qlx488RquAvKMm83VkMvxZtScB7Zm0NyBGrwm3Y`. Historical v0.1 exclusions do not override the new approved scope.
 
 ## Engineering workflow
 
