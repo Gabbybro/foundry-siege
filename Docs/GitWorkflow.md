@@ -4,9 +4,10 @@
 
 ## 分支与当前状态
 
-- `main`：保留通过验收的里程碑，首个可玩版本标记 `demo-v0.1`。安装验证基线仍可通过提交 `5374abd` 回看。
+- `main`：只保存通过验收的里程碑；本轮使用 `demo-v0.2` 标记。首个可玩版本 `demo-v0.1=6c8bed6` 和安装基线 `5374abd` 保留。
+- `codex/roguelike-demo`：v0.2 开发分支；`4cfa07e` 公共契约、`6bf39e8` 早期 WIP、`4aa2a15` 实际验证后的运行源码。交付文档另作提交，包内 manifest 记录程序源版本。
 - `codex/demo-foundation`：首版开发分支；历史提交 `3fdbced` 是暂停时不能编译的快照，后续已提交三个模块与集成修复。不要把历史快照状态误当成分支当前状态。
-- 私有远程：`https://github.com/Gabbybro/foundry-siege`。两个分支已上传并核对提交哈希；备份完成后已恢复三个执行聊天。当前共享工作区只由管理者执行 Git 分支、提交、合并和推送；模块聊天只编辑归属文件。
+- 私有远程：`https://github.com/Gabbybro/foundry-siege`，2026-10-24 再次通过 GitHub API 核对 `private=true`。共享工作区只由管理者执行 Git 分支、提交、合并和推送；模块聊天只编辑归属文件。正常推送后逐一核对 main、开发分支和标签的远端对象。
 
 ## 后续记录方式
 
@@ -23,7 +24,7 @@ git status --short
 git log --oneline --decorate -8
 git remote -v
 git diff --check
-git push -u origin codex/demo-foundation
+git push -u origin codex/roguelike-demo
 ```
 
 查看旧版本优先使用 `git show <commit>:<path>`。不要在多个聊天同时编辑时切换整个共享目录；回退前先保留当前进度。
