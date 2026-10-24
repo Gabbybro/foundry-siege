@@ -2,7 +2,7 @@
 
 Unity **6000.3.27f1**（revision `672d562a42a7`），C#、Built-In Render Pipeline、2D 物理，Windows x64 / Mono。
 
-本版包含两主动、七被动、正式五关与四个独立练习关。私有仓库：[Gabbybro/foundry-siege](https://github.com/Gabbybro/foundry-siege)。执行记录见 [RoguelikeDemoExecutionPlan](Docs/RoguelikeDemoExecutionPlan.md)，验收和限制见 [RoguelikeDemoDelivery](Docs/RoguelikeDemoDelivery.md)，版本约定见 [GitWorkflow](Docs/GitWorkflow.md)。
+本版包含两主动、七被动、正式五关与四个独立练习关。公开仓库：[Gabbybro/foundry-siege](https://github.com/Gabbybro/foundry-siege)，任何人可查看和下载源码。执行记录见 [RoguelikeDemoExecutionPlan](Docs/RoguelikeDemoExecutionPlan.md)，验收和限制见 [RoguelikeDemoDelivery](Docs/RoguelikeDemoDelivery.md)，版本约定见 [GitWorkflow](Docs/GitWorkflow.md)。
 
 ## 试玩
 

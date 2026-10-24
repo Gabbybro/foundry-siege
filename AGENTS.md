@@ -18,5 +18,5 @@
 - Close the Editor for this project before batch commands; do not run two Unity processes on one project.
 - Logs, builds, package caches, and installers are ignored by Git. Never commit `.setup`, `Library`, `Logs`, or `Builds`.
 - Git integration is owned by the project manager while execution chats share this checkout. Module chats must not switch branches, merge, reset, or push this shared repository.
-- Keep `main` at validated milestones. Save incomplete work on `codex/` branches with an explicit WIP commit and validation status. Push milestones to the configured private `origin`; do not force-push or rewrite shared history.
+- Keep `main` at validated milestones. Save incomplete work on `codex/` branches with an explicit WIP commit and validation status. Push milestones to the configured `origin`, made public by explicit user instruction on 2026-10-24 ("改为公开仓库，任何人可查看"); do not force-push or rewrite shared history.
 - The default Editor executable is `D:\Program Files\Unity\Hub\Editor\6000.3.27f1\Editor\Unity.exe`; the script accepts `-EditorPath` for other installations.
