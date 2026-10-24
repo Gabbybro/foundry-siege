@@ -57,6 +57,7 @@ namespace SiegeDemo
             launcher?.CancelAim();
             combat?.EndShot();
             generation++;
+            rebuilding = false;
             DamageableBody.ResetSession();
             loaded = null;
             if (world) for (int i = world.childCount - 1; i >= 0; i--)

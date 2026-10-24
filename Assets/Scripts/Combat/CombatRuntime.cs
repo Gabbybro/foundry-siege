@@ -49,6 +49,7 @@ namespace SiegeDemo
             if (value == null || !value.world || value.level == null || value.settings == null || value.build == null)
                 throw new ArgumentException("CombatContext requires world, level, build and ability settings.", nameof(value));
             EndShot();
+            CurrentShot = null;
             Unsubscribe();
             context = value;
             build = value.build.Copy();

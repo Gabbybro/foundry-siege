@@ -66,6 +66,24 @@
       "indestructible": false
     },
     {
+      "id": "primer-enemy",
+      "kind": 1,
+      "size": {
+        "x": 0.8,
+        "y": 1.0
+      },
+      "mass": 1.8,
+      "hitPoints": 1.5,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 4,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
       "id": "glass-trigger",
       "kind": 0,
       "size": {
@@ -87,14 +105,14 @@
       "id": "weak-post",
       "kind": 0,
       "size": {
-        "x": 0.4,
+        "x": 1.25,
         "y": 1.1
       },
-      "mass": 0.8,
+      "mass": 2.4,
       "hitPoints": 2.5,
       "impulseThreshold": 1.5,
       "damageMultiplier": 1.0,
-      "friction": 0.7,
+      "friction": 1.0,
       "bounciness": 0.0,
       "isStatic": false,
       "material": 1,
@@ -112,7 +130,7 @@
       "hitPoints": 8.0,
       "impulseThreshold": 1.5,
       "damageMultiplier": 1.0,
-      "friction": 0.7,
+      "friction": 0.9,
       "bounciness": 0.0,
       "isStatic": false,
       "material": 1,
@@ -159,7 +177,7 @@
     },
     {
       "id": "enemy-primer",
-      "partId": "enemy",
+      "partId": "primer-enemy",
       "position": {
         "x": 1.2,
         "y": -3.1
@@ -170,8 +188,8 @@
       "id": "weak-left",
       "partId": "weak-post",
       "position": {
-        "x": 2.3,
-        "y": -3.05
+        "x": 2.9,
+        "y": -3.04
       },
       "rotation": 0.0
     },
@@ -179,8 +197,8 @@
       "id": "weak-right",
       "partId": "weak-post",
       "position": {
-        "x": 4.7,
-        "y": -3.05
+        "x": 4.2,
+        "y": -3.04
       },
       "rotation": 0.0
     },
@@ -188,8 +206,8 @@
       "id": "upper-roof",
       "partId": "wood-roof",
       "position": {
-        "x": 3.5,
-        "y": -2.36
+        "x": 3.4,
+        "y": -2.34
       },
       "rotation": 0.0
     },
@@ -198,7 +216,7 @@
       "partId": "enemy",
       "position": {
         "x": 2.9,
-        "y": -1.72
+        "y": -1.69
       },
       "rotation": 0.0
     },
@@ -207,7 +225,7 @@
       "partId": "enemy",
       "position": {
         "x": 4.2,
-        "y": -1.72
+        "y": -1.69
       },
       "rotation": 0.0
     }

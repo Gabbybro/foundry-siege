@@ -30,10 +30,11 @@ namespace SiegeDemo
                 f.Part("wood two", new Vector2(82.5f, 20), new Vector2(.25f, 3), MaterialId.Wood);
                 f.Configure(Build(ActiveAbility.Split, PassiveAbility.WoodPiercing, PassiveAbility.GroundBounce, PassiveAbility.StoneRicochet));
                 CombatProjectile mother = f.Launch(new Vector2(80, 20), new Vector2(10, 0));
-                yield return new WaitForSeconds(.16f);
-                Require(mother.WoodPiercingUsed && mother.Body.position.x > 81.2f, "one wood pierced after ordinary damage");
+                yield return new WaitForSeconds(.4f);
+                Require(mother.WoodPiercingUsed && mother.Body.position.x > 81.2f && mother.Body.position.x < 82.4f, "one wood pierced, second wood blocks the same body");
                 float mass = mother.Body.mass;
-                Vector2 center = mother.Body.position, forward = mother.Body.linearVelocity.normalized;
+                Vector2 center = mother.Body.position;
+                Vector2 forward = mother.Body.linearVelocity.sqrMagnitude > .000001f ? mother.Body.linearVelocity.normalized : mother.EffectiveDirection;
                 Require(f.Runtime.TryUseActive(center, out _), "split click does not steer and can be at the drone center");
                 Require(mother.IsRetired && f.Runtime.CurrentShot.activeUsed && f.Runtime.ActiveProjectiles == 3, "mother replaced by three children");
                 var children = f.World.GetComponentsInChildren<CombatProjectile>();
@@ -130,11 +131,15 @@ namespace SiegeDemo
             {
                 var glass = f.Part("glass left", new Vector2(79, 20), new Vector2(.2f, 2), MaterialId.Glass, hp: 1);
                 var glassTwo = f.Part("second glass", new Vector2(75, 24), new Vector2(.2f, 2), MaterialId.Glass, hp: 1);
+                DamageSource glassSource = default;
+                glass.Destroyed += hit => glassSource = hit.LastDamageSource;
                 f.Configure(Build(ActiveAbility.None, PassiveAbility.GlassShards, PassiveAbility.WoodPiercing, PassiveAbility.GroundBounce,
                     PassiveAbility.StoneRicochet, PassiveAbility.ApexDive, PassiveAbility.RestExplosion));
                 var p = f.Launch(new Vector2(80, 20), new Vector2(-10, 0));
                 yield return new WaitForSeconds(.18f);
                 Require(!glass || glass.IsDestroyed, "real projectile collision broke glass");
+                Require(glassSource.kind == DamageKind.Collision && glassSource.directProjectile && glassSource.incidentDirection.x < 0 &&
+                    glassSource.generation == Fixture.Generation && glassSource.shotId == 1, "collision source preserves incident motion and shot identity");
                 Require(f.Runtime.CurrentShot.shardsUsed && f.CreatedShards.Count == 2, "exactly two shards from first direct glass break");
                 foreach (var velocity in f.CreatedShards) Require(velocity.x < 0 && Near(velocity.magnitude, f.Settings.shards.speed), "shard fan follows leftward incident velocity");
                 foreach (var shard in f.World.GetComponentsInChildren<CombatProjectile>())

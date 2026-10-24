@@ -28,12 +28,25 @@ namespace SiegeDemo
                 yield return current;
             }
             done = true;
-            Debug.Log("ROGUELIKE_SMOKE_SUCCESS: physics, two actives, retries, pause, five-stage flow, nine openings, independent practice");
+            bool focused = Array.IndexOf(Environment.GetCommandLineArgs(), "-practiceTest") >= 0 || Array.IndexOf(Environment.GetCommandLineArgs(), "-combatTest") >= 0;
+            Debug.Log(focused ? "ROGUELIKE_FOCUSED_SMOKE_SUCCESS" : "ROGUELIKE_SMOKE_SUCCESS: physics, two actives, retries, pause, five-stage flow, nine openings, independent practice");
             Application.Quit(0);
         }
         private IEnumerator Run()
         {
             Check(battle.Phase == RunPhase.MainMenu, "player starts at menu");
+            var args = Environment.GetCommandLineArgs();
+            if (Array.IndexOf(args, "-combatTest") >= 0) { yield return CombatRegression.Run(battle); yield break; }
+            int practiceArg = Array.IndexOf(args, "-practiceTest");
+            if (practiceArg >= 0 && practiceArg + 1 < args.Length)
+            {
+                var selected = Array.Find(battle.Practices, p => p.levelId == args[practiceArg + 1]);
+                Check(selected != null && battle.StartPractice(selected.levelId, selected.build.active, selected.build.passives), "focused practice entry");
+                yield return Ready();
+                yield return CheckOpening();
+                yield return PracticeCombo(selected.levelId);
+                yield break;
+            }
             Time.timeScale = 8;
             yield return PhysicsRegression.Run(Check);
             battle.StartCampaign();
@@ -116,8 +129,13 @@ namespace SiegeDemo
             battle.RetryLevel();
             yield return Ready();
             Check(battle.Ammunition == 3 && battle.Build.active == failureBuild.active && battle.RewardRandomState == failureRng, "failure retry keeps snapshot");
+            // The third and final shot must still be allowed to collapse the C01 tower.
+            for (int i = 0; i < 2; i++) { Check(battle.TryLaunch(Shot(1, 75)), "last-ammo setup miss"); yield return Settled(); }
+            Check(battle.TryLaunch(Shot(3, 5)) && battle.Ammunition == 0 && battle.State == BattleState.Resolving, "last ammo remains resolving");
+            yield return Settled();
+            Check(battle.Phase == RunPhase.RewardSelection && battle.ResultCount == 1, "last-ammo physical victory grants reward once");
             battle.RestartRun();
-            Check(battle.Phase == RunPhase.ActiveSelection, "failure can restart whole run");
+            Check(battle.Phase == RunPhase.ActiveSelection, "completed level can restart whole run");
             Check(battle.SelectActive(ActiveAbility.Dash), "new campaign starts");
             var owned = new HashSet<PassiveAbility>();
             for (int level = 0; level < 5; level++)
@@ -151,6 +169,25 @@ namespace SiegeDemo
             }
             Check(battle.Phase == RunPhase.RunComplete && battle.Build.passives.Length == 4 && battle.RewardChoices.Length == 0, "five stages and no fifth reward");
             Debug.Log("ROGUELIKE_FLOW_SUCCESS: synthetic boundary events exercise five stages, four rewards, entry snapshots; not a physical level-solution claim");
+            battle.ReturnToMenu();
+            Check(battle.StartPractice("P01", ActiveAbility.Dash, new[] { PassiveAbility.RestExplosion }), "custom practice build");
+            yield return Ready();
+            Check(battle.TryLaunch(Shot(1, 75)), "rest-timer retry launch");
+            var resting = Projectile().GetComponent<CombatProjectile>();
+            float restLimit = Time.time + 8;
+            while (resting && !resting.IsCountingDown && Time.time < restLimit) yield return new WaitForFixedUpdate();
+            Check(resting && resting.IsCountingDown, "real shot reaches supported explosion countdown");
+            int timerGeneration = battle.Generation;
+            battle.RetryLevel();
+            yield return Ready();
+            yield return new WaitForSeconds(2);
+            Check(battle.Generation > timerGeneration && battle.Ammunition == 3 && battle.DamageEvents == 0 && battle.Combat.PendingEffects == 0, "retry cancels old explosion timer");
+            battle.Data.settlement.minSeconds = .05f;
+            battle.Data.settlement.stableSeconds = 20;
+            battle.Data.settlement.timeoutSeconds = .15f;
+            Check(battle.TryLaunch(Shot(1, 75)), "timeout fixture");
+            yield return Settled();
+            Check(battle.State == BattleState.Ready && battle.LastSettlement == "Timeout" && battle.ActiveProjectiles == 0 && battle.Combat.PendingEffects == 0, "timeout retires current shot and pending abilities");
             foreach (var practice in battle.Practices)
             {
                 battle.ReturnToMenu();
@@ -191,12 +228,21 @@ namespace SiegeDemo
             int targets = battle.TargetsRemaining;
             yield return new WaitForSeconds(4);
             var placements = LevelConfiguration.Expand(battle.Data);
-            foreach (var marker in battle.World.GetComponentsInChildren<LevelObjectMarker>())
+            var markers = battle.World.GetComponentsInChildren<LevelObjectMarker>();
+            Check(markers.Length == placements.Count, "all configured parts survive opening: " + battle.LevelId);
+            foreach (var marker in markers)
             {
                 var placement = placements.Find(p => p.id == marker.objectId);
-                Check(Vector2.Distance(marker.transform.position, placement.position) < .15f && Mathf.Abs(Mathf.DeltaAngle(marker.transform.eulerAngles.z, placement.rotation)) < 4, "opening position stable: " + battle.LevelId + "/" + marker.objectId);
+                var part = Array.Find(battle.Data.parts, p => p.id == placement.partId);
+                var health = marker.GetComponent<DamageableBody>();
+                Check(health && !health.IsDestroyed && Mathf.Abs(health.HitPoints - part.hitPoints) < .001f, "initial HP intact: " + battle.LevelId + "/" + marker.objectId);
+                float drift = Vector2.Distance(marker.transform.position, placement.position);
+                float angleDrift = Mathf.Abs(Mathf.DeltaAngle(marker.transform.eulerAngles.z, placement.rotation));
+                var rigidbody = marker.GetComponent<Rigidbody2D>();
+                Check(drift < .15f && angleDrift < 4, "opening position stable: " + battle.LevelId + "/" + marker.objectId + " expected=" + placement.position + " actual=" + marker.transform.position + " physics=" + (rigidbody ? rigidbody.position.ToString() : "static") + " velocity=" + (rigidbody ? rigidbody.linearVelocity.ToString() : "static") + " drift=" + drift + " degrees=" + angleDrift);
             }
             Check(battle.TargetsRemaining == targets && Mathf.Abs(hp - Health()) < .001f, "opening HP stable: " + battle.LevelId);
+            Check(targets == placements.FindAll(p => Array.Find(battle.Data.parts, part => part.id == p.partId).kind == PartKind.Target).Count, "all configured targets survive opening: " + battle.LevelId);
             Debug.Log("ROGUELIKE_OPENING_STABLE: " + battle.LevelId);
         }
         private float Health() { float sum = 0; foreach (var body in battle.World.GetComponentsInChildren<DamageableBody>()) sum += body.HitPoints; return sum; }

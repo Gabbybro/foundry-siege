@@ -80,20 +80,22 @@ yield return CombatRegression.Run(battle);
 
 | 类别 | 检查 | 状态／证据 |
 | --- | --- | --- |
-| 正常 | 两主动实际速率、质量守恒、当前方向、三枚互不碰撞、子体额度刷新 | CombatRegression 已实现；root 首次 smoke 发现缓存方向滞后一固定步，已改为瞬时实际速度；修正后待统一复跑 |
-| 正常 | 木材真实穿过／第二块阻挡、厚木不耗；地面优先；擦石与正撞；自然顶点与下降分裂 | 真实 player 夹具已实现，不能以独立编译当作物理通过 |
-| 正常 | 左向玻璃入射产生固定两片、无继承；停驻爆破直接扣血并回收 | 真实 player 夹具已实现，待 root 运行 |
-| 重复 | 连续主动、共享破片额度、多回调碰撞、同敌死亡与连锁 | 回归含一次主动、第二块玻璃、Boundary 与有界队列检查；原 v0.1 去重保留 |
-| 重置 | 运动清倒计时、重复 EndShot 无爆炸；Configure 清旧 generation、重试清旧本发 | 回归含倒计时运动重置与重复 EndShot；root smoke 负责完整入关快照／RNG／跨关 |
-| 异常 | 冲刺中心／超弧／NaN 不扣次数；UI／暂停／失焦不误射；发射 MouseUp 不触发主动 | 方向与非法值纯函数已覆盖；真实键鼠和焦点由 root UI 运行检查 |
-| 遮挡 | 一次冲击击碎墙仍不伤／推墙后目标；下次效果重新可见 | 真实快照夹具已实现；待 root 运行 |
-| 终止 | 空中低速不结算；破片寿命、稳定清理；超时取消剩余效果 | 空中与 EndShot 夹具已实现；root 控制最终超时与输赢 |
+| 正常 | 两主动实际速率、质量守恒、当前方向、三枚互不碰撞、子体额度刷新 | root 实际 player CombatRegression 通过 |
+| 正常 | 木材真实穿过／第二块阻挡、厚木不耗；地面优先；擦石与正撞；自然顶点与下降分裂 | root 实际 player CombatRegression 通过 |
+| 正常 | 左向玻璃入射产生固定两片、无继承；停驻爆破直接扣血并回收 | root 实际 player CombatRegression 通过 |
+| 重复 | 连续主动、共享破片额度、多回调碰撞、同敌死亡与连锁 | CombatRegression 的一次主动、第二块玻璃、Boundary 检查通过；root 基础物理去重检查通过；P03 实际连锁全灭通过 |
+| 重置 | 运动清倒计时、重复 EndShot 无爆炸；Configure 清旧 generation、重试清旧本发 | CombatRegression 的倒计时运动重置与重复 EndShot 通过；管理者报告 root 暂停／重试／五关流程通过 |
+| 异常 | 冲刺中心／超弧／NaN 不扣次数；UI／暂停／失焦不误射；发射 MouseUp 不触发主动 | 中心／超弧真实 player 通过，非法值托管检查通过；原始键鼠／UI／焦点的最终覆盖以 root 窗口验收为准 |
+| 遮挡 | 一次冲击击碎墙仍不伤／推墙后目标；下次效果重新可见 | root 实际 player 遮挡快照夹具通过 |
+| 终止 | 空中低速不结算；破片寿命、稳定清理；超时取消剩余效果 | 空中与 EndShot 实际 player 通过；破片寿命已有实现，本回归未单独等待完整寿命；root 控制最终超时与输赢 |
 
 本聊天实际执行：
 
-1. 当前全部 `Assets/Scripts`（包含 CombatRegression 与真实 BattleController）用 Unity **6000.3.27f1** 安装目录的 netstandard/Unity 模块、C# 9、warnings-as-errors 独立编译：通过。回归文件最初的静态常量实例访问错误已修正并重新纳入全量编译。
+1. 当前全部 `Assets/Scripts`（包含 CombatRegression 与真实 BattleController）用 Unity **6000.3.27f1** 安装目录的 netstandard/Unity 模块、C# 9、warnings-as-errors 独立编译：通过。
 2. 原始 Combat 源码加真实共享契约、真实 Unity 托管程序集在 .NET 9 运行 **150 条断言通过**：三档与角度、非法输入、伤害公式、无序 key、会话重置、扇形方向、分裂定速、角度跨 180°、径向衰减；没有模拟原生物理。
-3. 本聊天未启动 Unity 或 Windows player。root 已实际开始构建／smoke，首次分裂方向失败已定位修正；当前最新完整回归结果应由 root 的 Logs/player-smoke.log 及交付记录确认，不能把先前版本运行记录写成当前机制全部通过。
+3. 本聊天未启动 Unity 或 Windows player。已只读核实管理者实际 `-combatTest` 日志 `Logs/v02-combat.log`，其中同时出现 `COMBAT_REGRESSION_SUCCESS`、`ROGUELIKE_FOCUSED_SMOKE_SUCCESS`，未发现 FAILED、Exception 或 COMBAT_EFFECT_LIMIT。完整 CombatRegression 已在真实 Windows player 通过。
+4. 已核实实际组合日志：P01 母体穿木→分裂→三子体独立穿木；P02 Dash→GroundBounce 并剩余目标 0；`Logs/v02-p03-isolated.log` 为 GlassShards→多次 DeathShock、剩余目标 0；`Logs/v02-p04.log` 同时触发 StoneRicochet 与 ApexDive。管理者另确认 root 两主动／暂停／重试／五关流程通过。
+5. 剩余集成项：P03 多关切换后的初态漂移由配置模块排查，独立新进程 P03 组合全灭已通过；P04 已触发擦石与俯冲，但当前落点略过木顶，布局由配置模块调整。全九关自然通关、键鼠窗口体验与最终构建交付仍以管理者统一结果为准。
 
 临时托管检查工程仍在 `C:\Users\Gabby\AppData\Local\Temp\SiegeDemoCombatCheck\MathChecks.csproj`；执行 `dotnet run --project '<该绝对路径>' --configuration Release --no-launch-profile --no-restore`。该临时工程不进入 Git。正式可复跑的物理回归源码已在 Combat/Validation 交付。
 

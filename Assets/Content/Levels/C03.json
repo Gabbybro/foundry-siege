@@ -66,17 +66,35 @@
       "indestructible": false
     },
     {
-      "id": "bridge-post",
-      "kind": 0,
+      "id": "under-enemy",
+      "kind": 1,
       "size": {
-        "x": 0.45,
-        "y": 1.4
+        "x": 0.8,
+        "y": 1.0
       },
-      "mass": 1.5,
-      "hitPoints": 8.0,
+      "mass": 1.8,
+      "hitPoints": 4.0,
       "impulseThreshold": 1.5,
       "damageMultiplier": 1.0,
       "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 4,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "bridge-post",
+      "kind": 0,
+      "size": {
+        "x": 1.6,
+        "y": 1.38
+      },
+      "mass": 3.2,
+      "hitPoints": 8.0,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 1.0,
       "bounciness": 0.0,
       "isStatic": false,
       "material": 1,
@@ -170,7 +188,7 @@
       "id": "bridge-left",
       "partId": "bridge-post",
       "position": {
-        "x": 1.0,
+        "x": 1.6,
         "y": -2.9
       },
       "rotation": 0.0
@@ -179,7 +197,7 @@
       "id": "bridge-right",
       "partId": "bridge-post",
       "position": {
-        "x": 5.0,
+        "x": 4.4,
         "y": -2.9
       },
       "rotation": 0.0
@@ -240,7 +258,7 @@
     },
     {
       "id": "enemy-under",
-      "partId": "enemy",
+      "partId": "under-enemy",
       "position": {
         "x": 3.0,
         "y": -3.1

@@ -12,9 +12,19 @@ namespace SiegeDemo
             var events = new List<CombatEvent>();
             Action<CombatEvent> handler = value => { events.Add(value); Debug.Log("PRACTICE_EVENT: " + id + " " + value.kind + " p=" + value.projectileId + " at=" + value.position); };
             bool shardKill = false;
+            bool woodHitAfterDive = false;
             battle.CombatFeedback += handler;
             foreach (var target in battle.World.GetComponentsInChildren<DamageableBody>())
+            {
                 if (target.IsTarget) target.Destroyed += body => { if (body.LastDamageSource.directProjectile && body.LastDamageSource.projectileKind == ProjectileKind.Shard) shardKill = true; };
+                target.Damaged += (body, amount) =>
+                {
+                    if (id == "P03") Debug.Log("PRACTICE_DAMAGE: P03/" + body.name + " hp=" + body.HitPoints + " source=" + body.LastDamageSource.kind + " projectile=" + body.LastDamageSource.projectileKind);
+                    var surface = body.GetComponent<PartSurface>();
+                    if (surface && surface.Material == MaterialId.Wood && events.Exists(value => value.kind == CombatEventKind.ApexDive))
+                    { woodHitAfterDive = true; Debug.Log("PRACTICE_WOOD_AFTER_DIVE: " + id + "/" + body.name); }
+                };
+            }
             try
             {
                 Time.timeScale = 4;
@@ -46,9 +56,10 @@ namespace SiegeDemo
                 else if (id == "P03")
                 {
                     Check(battle.TryLaunch(Shot(3, 5)), "P03 launch at glass trigger");
-                    yield return new WaitForSeconds(2);
+                    yield return Settled();
                     Check(Ordered(events, CombatEventKind.GlassShards, CombatEventKind.DeathShock), "P03 glass shards precede death shock");
                     Check(shardKill, "P03 shard physically kills first target");
+                    Check(events.FindAll(value => value.kind == CombatEventKind.DeathShock).Count >= 2 && battle.TargetsRemaining < 2, "P03 first death shock causes a later target death");
                     int shardBursts = 0;
                     foreach (var value in events) if (value.kind == CombatEventKind.GlassShards) shardBursts++;
                     Check(shardBursts == 1, "P03 shared shard quota");
@@ -58,7 +69,7 @@ namespace SiegeDemo
                     Check(battle.TryLaunch(Shot(3, 5)), "P04 low angle into ramp");
                     yield return new WaitForSeconds(4);
                     Check(Ordered(events, CombatEventKind.StoneRicochet, CombatEventKind.ApexDive), "P04 stone before natural apex dive");
-                    Check(battle.DamageEvents > 0, "P04 dive reaches wooden roof");
+                    Check(woodHitAfterDive, "P04 dive reaches wooden roof after apex");
                 }
                 Debug.Log("PRACTICE_COMBO_SUCCESS: " + id + " damageEvents=" + battle.DamageEvents + " remaining=" + battle.TargetsRemaining);
             }

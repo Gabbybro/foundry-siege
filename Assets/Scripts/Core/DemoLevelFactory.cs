@@ -31,15 +31,22 @@ namespace SiegeDemo
                 if (!part.isStatic)
                 {
                     var body = go.AddComponent<Rigidbody2D>();
+                    body.simulated = false;
+                    body.position = placement.position;
+                    body.rotation = placement.rotation;
+                    body.linearVelocity = Vector2.zero;
+                    body.angularVelocity = 0;
                     body.mass = part.mass;
                     body.interpolation = RigidbodyInterpolation2D.Interpolate;
                     body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
                     body.angularDamping = .12f;
-                    if (!gameplay) body.simulated = false;
                 }
                 if (gameplay) go.AddComponent<DamageableBody>().Initialize(part);
                 DemoPresentation.DecoratePart(go, part);
             }
+            // Register the authored poses before activating CCD/contact simulation.
+            Physics2D.SyncTransforms();
+            if (gameplay) foreach (var body in root.GetComponentsInChildren<Rigidbody2D>()) body.simulated = true;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace SiegeDemo
@@ -18,6 +19,7 @@ namespace SiegeDemo
         private ICombatRuntime combat;
         private float victoryStarted = -1;
         private bool legacyMode;
+        private bool rebuilding;
         public BattleState State { get; private set; }
         public int Ammunition { get; private set; }
         public int TargetsRemaining { get; private set; }
@@ -59,6 +61,7 @@ namespace SiegeDemo
             else ReturnToMenu();
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "-legacySmokeTest") >= 0 || (legacyMode && Array.IndexOf(Environment.GetCommandLineArgs(), "-smokeTest") >= 0)) gameObject.AddComponent<DemoSmokeRunner>();
             else if (Array.IndexOf(Environment.GetCommandLineArgs(), "-smokeTest") >= 0) gameObject.AddComponent<RoguelikeSmokeRunner>();
+            else if (Array.IndexOf(Environment.GetCommandLineArgs(), "-practiceTest") >= 0 || Array.IndexOf(Environment.GetCommandLineArgs(), "-combatTest") >= 0) gameObject.AddComponent<RoguelikeSmokeRunner>();
             else if (Array.IndexOf(Environment.GetCommandLineArgs(), "-solveTest") >= 0) gameObject.AddComponent<DemoAimSearch>();
             else if (Array.IndexOf(Environment.GetCommandLineArgs(), "-solveRun") >= 0) gameObject.AddComponent<RoguelikeAimSearch>();
             Debug.Log("DEMO_READY: " + data.name + " / Unity " + Application.unityVersion);
@@ -78,15 +81,31 @@ namespace SiegeDemo
             generation++;
             int currentGeneration = generation;
             DamageableBody.ResetSession();
-            DemoLevelFactory.Rebuild(data, world, true);
+            for (int i = world.childCount - 1; i >= 0; i--)
+            {
+                var child = world.GetChild(i).gameObject;
+                child.SetActive(false);
+                Destroy(child);
+            }
             loaded = null;
             victoryStarted = -1;
-            launcher.Configure(this, battleCamera, data.launcher, data.launch);
-            for (int i = launcherVisual.childCount - 1; i >= 0; i--) { launcherVisual.GetChild(i).gameObject.SetActive(false); Destroy(launcherVisual.GetChild(i).gameObject); }
-            DemoPresentation.CreateLauncher(data.launcher, launcherVisual);
             Ammunition = data.ammunition;
             ShotsFired = ResultCount = DynamicHits = DamageEvents = 0;
             TargetsRemaining = 0;
+            rebuilding = true;
+            LastSettlement = "Preparing";
+            ChangeState(BattleState.Preparing);
+            StartCoroutine(RebuildAfterCleanup(currentGeneration));
+        }
+        private IEnumerator RebuildAfterCleanup(int currentGeneration)
+        {
+            // Complete deferred destruction before inserting the next level's native bodies.
+            yield return null;
+            if (currentGeneration != generation || Phase != RunPhase.Battle) yield break;
+            DemoLevelFactory.Rebuild(data, world, true);
+            launcher.Configure(this, battleCamera, data.launcher, data.launch);
+            for (int i = launcherVisual.childCount - 1; i >= 0; i--) { launcherVisual.GetChild(i).gameObject.SetActive(false); Destroy(launcherVisual.GetChild(i).gameObject); }
+            DemoPresentation.CreateLauncher(data.launcher, launcherVisual);
             foreach (var damageable in world.GetComponentsInChildren<DamageableBody>())
             {
                 if (damageable.IsTarget) TargetsRemaining++;
@@ -102,6 +121,7 @@ namespace SiegeDemo
             });
             LastSettlement = "Preparing";
             ChangeState(BattleState.Preparing);
+            rebuilding = false;
             Debug.Log("DEMO_RESET: ammo=" + Ammunition + " targets=" + TargetsRemaining);
         }
         private void OnDamaged(DamageableBody body, float damage)
@@ -147,7 +167,7 @@ namespace SiegeDemo
         }
         private void FixedUpdate()
         {
-            if (data == null || !world || Phase != RunPhase.Battle || IsPaused) return;
+            if (data == null || !world || Phase != RunPhase.Battle || IsPaused || rebuilding) return;
             foreach (var body in world.GetComponentsInChildren<Rigidbody2D>())
             {
                 Vector2 p = body.position;
