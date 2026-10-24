@@ -3,6 +3,7 @@ using UnityEngine;
 namespace SiegeDemo
 {
     [DisallowMultipleComponent]
+    [DefaultExecutionOrder(-1000)]
     public sealed class DemoPresentation : MonoBehaviour
     {
         private static DemoPresentation active;
@@ -11,6 +12,7 @@ namespace SiegeDemo
         private Transform environment;
         private DemoImpactEffects effects;
         private DemoHud hud;
+        private IRunSession run;
         private BattleState previousState = BattleState.Preparing;
         internal static IBattleSession CurrentSession => active && active.isActiveAndEnabled ? active.session : null;
 
@@ -19,7 +21,9 @@ namespace SiegeDemo
 
         public void Configure(IBattleSession battleSession, Camera camera)
         {
+            Unsubscribe();
             session = battleSession;
+            run = battleSession as IRunSession;
             battleCamera = camera ? camera : Camera.main;
             active = this;
             if (!environment) environment = DemoEnvironment.Create(transform);
@@ -27,10 +31,14 @@ namespace SiegeDemo
             if (hud == null) hud = new DemoHud();
             previousState = session != null ? session.State : BattleState.Preparing;
             effects.Clear();
+            hud.ResetRunUi();
+            Subscribe();
+            hud.PublishBlockingRects(run);
         }
 
         public static void DecoratePart(GameObject go, PartDefinition part) => DemoVisualFactory.Part(go, part);
         public static void DecorateProjectile(GameObject go) => DemoVisualFactory.Projectile(go);
+        public static void DecorateProjectile(GameObject go, ProjectileKind kind) => DemoVisualFactory.Projectile(go, kind);
         public static void CreateLauncher(Vector2 origin, Transform parent) => DemoVisualFactory.Launcher(origin, parent);
         public static void PlayImpact(Vector2 position, float damage, bool destroyed)
         {
@@ -40,31 +48,56 @@ namespace SiegeDemo
         // Optional immediate cleanup for code that restarts twice within one frame.
         public static void ClearFeedback() { if (active) active.effects?.Clear(); }
 
-        private void OnEnable() { active = this; }
+        private void OnEnable() { active = this; Subscribe(); }
+        private void Subscribe()
+        {
+            if (run == null) return;
+            run.CombatFeedback -= OnCombatFeedback;
+            run.CombatFeedback += OnCombatFeedback;
+        }
+        private void Unsubscribe() { if (run != null) run.CombatFeedback -= OnCombatFeedback; }
+        private void OnCombatFeedback(CombatEvent feedback)
+        {
+            if (!isActiveAndEnabled || run == null || run.Phase != RunPhase.Battle) return;
+            hud?.ObserveCombatFeedback(run, feedback);
+            effects?.PlayAbility(feedback);
+        }
         private void Update()
         {
             if (session == null) return;
+            hud?.PublishBlockingRects(run);
             // Preparing is also the reset signal defined by IBattleSession.
             if (session.State == BattleState.Preparing) effects?.Clear();
             if (previousState != session.State) { hud?.StateChanged(); previousState = session.State; }
-            effects?.Tick(Time.unscaledDeltaTime);
+            if (run == null || !run.IsPaused) effects?.Tick(Time.deltaTime);
         }
+
+        private void LateUpdate() { hud?.MaintainModalPause(run); }
 
         private void OnGUI()
         {
             if (hud == null) return;
-            effects?.DrawLabels(battleCamera, hud.DamageStyle);
-            if (hud.Draw(session))
+            if (run != null)
             {
-                effects?.Clear();
-                session?.Restart();
+                if (run.Phase == RunPhase.Battle && !run.IsPaused) effects?.DrawLabels(battleCamera, hud.DamageStyle);
+                hud.DrawRun(run);
+            }
+            else
+            {
+                effects?.DrawLabels(battleCamera, hud.DamageStyle);
+                if (hud.Draw(session))
+                {
+                    effects?.Clear();
+                    session?.Restart();
+                }
             }
         }
 
-        private void OnDisable() { if (active == this) active = null; effects?.Clear(); }
+        private void OnDisable() { if (active == this) active = null; Unsubscribe(); effects?.Clear(); }
         private void OnDestroy()
         {
             if (active == this) active = null;
+            Unsubscribe();
             effects?.Dispose();
             hud?.Dispose();
             DemoPrimitives.Dispose(environment ? environment.gameObject : null);

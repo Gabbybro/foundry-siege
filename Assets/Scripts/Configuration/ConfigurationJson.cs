@@ -12,16 +12,31 @@ namespace SiegeDemo
     {
         private readonly string source;
         private int offset;
+        private readonly Dictionary<string, HashSet<string>> levelFields = new Dictionary<string, HashSet<string>>();
+        private int levelVersion;
         private ConfigurationJson(string source) { this.source = source; }
 
         public static void Check(string json)
         {
+            Check(json, typeof(LevelData));
+        }
+
+        internal static void Check(string json, Type rootType)
+        {
             if (string.IsNullOrWhiteSpace(json)) throw new FormatException("$: JSON 不能为空");
             var reader = new ConfigurationJson(json);
             if (json[0] == '\uFEFF') reader.offset++;
-            reader.Value(typeof(LevelData), "$", 0);
+            reader.Value(rootType, "$", 0);
             reader.Space();
             if (reader.offset != json.Length) reader.Fail("$", "根对象后有多余内容");
+            if (rootType == typeof(LevelData) && reader.levelVersion >= 2)
+            {
+                foreach (var fields in reader.levelFields)
+                {
+                    string[] required = fields.Key == "$" ? new[] { "id" } : new[] { "material", "isGround", "indestructible" };
+                    foreach (string name in required) if (!fields.Value.Contains(name)) reader.Fail(fields.Key + "." + name, "版本 2 缺少必填字段");
+                }
+            }
         }
 
         private void Value(Type expected, string path, int depth)
@@ -48,7 +63,11 @@ namespace SiegeDemo
                 {
                     if (!float.TryParse(token, NumberStyles.Float, CultureInfo.InvariantCulture, out float value) || float.IsInfinity(value) || float.IsNaN(value)) Fail(path, "数值超出有限 float 范围");
                 }
-                else if (!int.TryParse(token, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out _)) Fail(path, "必须是 int 范围内的整数");
+                else
+                {
+                    if (!int.TryParse(token, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out int integer)) Fail(path, "必须是 int 范围内的整数");
+                    else if (path == "$.version") levelVersion = integer;
+                }
                 return;
             }
             if (expected.IsArray)
@@ -87,6 +106,7 @@ namespace SiegeDemo
                 optional |= expected == typeof(PartDefinition) && (member.Name == "material" || member.Name == "isGround" || member.Name == "indestructible");
                 if (!optional && !seen.Contains(member.Name)) Fail(path + "." + member.Name, "缺少必填字段");
             }
+            if (expected == typeof(LevelData) || expected == typeof(PartDefinition)) levelFields[path] = seen;
         }
 
         private string Number(string path)

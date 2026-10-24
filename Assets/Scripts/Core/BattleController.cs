@@ -3,16 +3,21 @@ using UnityEngine;
 
 namespace SiegeDemo
 {
-    public sealed class BattleController : MonoBehaviour, IBattleSession
+    public sealed partial class BattleController : MonoBehaviour, IRunSession
     {
         [SerializeField] private TextAsset levelSource;
         [SerializeField] private Camera battleCamera;
+        [SerializeField] private TextAsset runSource;
+        [SerializeField] private TextAsset[] levelSources;
         private LevelData data;
         private Transform world, launcherVisual;
         private LauncherController launcher;
         private Rigidbody2D loaded;
         private float stateStarted, quietTime;
         private int generation;
+        private ICombatRuntime combat;
+        private float victoryStarted = -1;
+        private bool legacyMode;
         public BattleState State { get; private set; }
         public int Ammunition { get; private set; }
         public int TargetsRemaining { get; private set; }
@@ -26,35 +31,59 @@ namespace SiegeDemo
         public int DamageEvents { get; private set; }
         public string LastSettlement { get; private set; }
         public Transform World => world;
+        public int Generation => generation;
+        public ICombatRuntime Combat => combat;
 
         public void Configure(TextAsset source, Camera camera) { levelSource = source; battleCamera = camera; }
+        public void ConfigureRun(TextAsset source, TextAsset[] levels) { runSource = source; levelSources = levels; }
         private void Start()
         {
             Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
             Application.targetFrameRate = 60;
             if (!battleCamera) battleCamera = Camera.main;
-            try { data = LevelConfiguration.Parse(levelSource.text); }
+            legacyMode = !runSource || Array.IndexOf(Environment.GetCommandLineArgs(), "-legacySmokeTest") >= 0 || Array.IndexOf(Environment.GetCommandLineArgs(), "-solveTest") >= 0 || Array.IndexOf(Environment.GetCommandLineArgs(), "-solveRun") >= 0;
+            try
+            {
+                data = LevelConfiguration.Parse(levelSource.text);
+                if (runSource) LoadRunCatalog();
+            }
             catch (Exception ex) { Debug.LogError("DEMO_CONFIG_FAILED: " + ex); enabled = false; return; }
             world = new GameObject("Battle World").transform;
             launcherVisual = new GameObject("Launch Platform").transform;
             DemoPresentation.CreateLauncher(data.launcher, launcherVisual);
             launcher = gameObject.AddComponent<LauncherController>();
             launcher.Configure(this, battleCamera, data.launcher, data.launch);
+            combat = gameObject.AddComponent<CombatRuntime>();
             gameObject.AddComponent<DemoPresentation>().Configure(this, battleCamera);
-            Restart();
-            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-smokeTest") >= 0) gameObject.AddComponent<DemoSmokeRunner>();
+            if (legacyMode) { Phase = RunPhase.Battle; Restart(); }
+            else ReturnToMenu();
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-legacySmokeTest") >= 0 || (legacyMode && Array.IndexOf(Environment.GetCommandLineArgs(), "-smokeTest") >= 0)) gameObject.AddComponent<DemoSmokeRunner>();
+            else if (Array.IndexOf(Environment.GetCommandLineArgs(), "-smokeTest") >= 0) gameObject.AddComponent<RoguelikeSmokeRunner>();
             else if (Array.IndexOf(Environment.GetCommandLineArgs(), "-solveTest") >= 0) gameObject.AddComponent<DemoAimSearch>();
+            else if (Array.IndexOf(Environment.GetCommandLineArgs(), "-solveRun") >= 0) gameObject.AddComponent<RoguelikeAimSearch>();
             Debug.Log("DEMO_READY: " + data.name + " / Unity " + Application.unityVersion);
         }
         public void Restart()
         {
+            if (!legacyMode) { RetryLevel(); return; }
+            RebuildCurrentLevel();
+        }
+        private void RebuildCurrentLevel()
+        {
             if (data == null || !world) return;
+            Time.timeScale = 1;
+            IsPaused = false;
             launcher.CancelAim();
+            combat?.EndShot();
             generation++;
             int currentGeneration = generation;
             DamageableBody.ResetSession();
             DemoLevelFactory.Rebuild(data, world, true);
             loaded = null;
+            victoryStarted = -1;
+            launcher.Configure(this, battleCamera, data.launcher, data.launch);
+            for (int i = launcherVisual.childCount - 1; i >= 0; i--) { launcherVisual.GetChild(i).gameObject.SetActive(false); Destroy(launcherVisual.GetChild(i).gameObject); }
+            DemoPresentation.CreateLauncher(data.launcher, launcherVisual);
             Ammunition = data.ammunition;
             ShotsFired = ResultCount = DynamicHits = DamageEvents = 0;
             TargetsRemaining = 0;
@@ -64,6 +93,13 @@ namespace SiegeDemo
                 damageable.Destroyed += body => { if (currentGeneration == generation) OnDestroyed(body); };
                 damageable.Damaged += (body, damage) => { if (currentGeneration == generation) OnDamaged(body, damage); };
             }
+            combat?.Configure(new CombatContext
+            {
+                world = world, generation = generation, level = data,
+                build = build.Copy(), settings = runData == null ? new AbilitySettings() : runData.abilities,
+                onEvent = OnCombatEvent,
+                onProjectileCreated = (go, kind) => { if (currentGeneration == generation && go) DemoPresentation.DecorateProjectile(go, kind); }
+            });
             LastSettlement = "Preparing";
             ChangeState(BattleState.Preparing);
             Debug.Log("DEMO_RESET: ammo=" + Ammunition + " targets=" + TargetsRemaining);
@@ -95,22 +131,23 @@ namespace SiegeDemo
         }
         public bool TryLaunch(LaunchSolution solution)
         {
-            if (State != BattleState.Ready || Ammunition <= 0 || !loaded || !solution.valid) return false;
+            if (Phase != RunPhase.Battle || IsPaused || State != BattleState.Ready || Ammunition <= 0 || !loaded || !solution.valid) return false;
             if (solution.tier < 1 || solution.tier > 3 || !float.IsFinite(solution.angle) || !float.IsFinite(solution.velocity.x) || !float.IsFinite(solution.velocity.y)) return false;
             // Reconstruct authoritative speed; callers cannot introduce continuous power or invalid angles.
             float angle = Mathf.Clamp(solution.angle, data.launch.minAngle, data.launch.maxAngle) * Mathf.Deg2Rad;
             Vector2 velocity = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * data.launch.maxSpeed * solution.tier / 3f;
             loaded.bodyType = RigidbodyType2D.Dynamic;
             loaded.linearVelocity = velocity;
-            loaded = null;
             Ammunition--; ShotsFired++;
+            combat?.BeginShot(loaded, ShotsFired);
+            loaded = null;
             ChangeState(BattleState.Resolving);
             Debug.Log("DEMO_SHOT: " + ShotsFired + " velocity=" + velocity);
             return true;
         }
         private void FixedUpdate()
         {
-            if (data == null || !world) return;
+            if (data == null || !world || Phase != RunPhase.Battle || IsPaused) return;
             foreach (var body in world.GetComponentsInChildren<Rigidbody2D>())
             {
                 Vector2 p = body.position;
@@ -119,12 +156,18 @@ namespace SiegeDemo
                 if (damageable) damageable.Eliminate(); else { body.gameObject.SetActive(false); Destroy(body.gameObject); }
             }
             if (State == BattleState.Won || State == BattleState.Lost) return;
-            if (TargetsRemaining == 0) { Finish(true); return; }
+            if (TargetsRemaining == 0)
+            {
+                if (victoryStarted < 0) { victoryStarted = Time.time; launcher.CancelAim(); }
+                if (Time.time - victoryStarted >= .35f) Finish(true);
+                return;
+            }
             if (State != BattleState.Preparing && State != BattleState.Resolving) return;
             bool stable = true;
             foreach (var body in world.GetComponentsInChildren<Rigidbody2D>())
                 if (body.bodyType == RigidbodyType2D.Dynamic && !body.IsSleeping() &&
                     (body.linearVelocity.magnitude > data.settlement.linearThreshold || Mathf.Abs(body.angularVelocity) > data.settlement.angularThreshold)) { stable = false; break; }
+            if (State == BattleState.Resolving && combat != null && combat.HasUnsettledEffects) stable = false;
             quietTime = stable ? quietTime + Time.fixedDeltaTime : 0;
             float elapsed = Time.time - stateStarted;
             float minimum = State == BattleState.Preparing ? 1 : data.settlement.minSeconds;
@@ -134,6 +177,7 @@ namespace SiegeDemo
             LastSettlement = timeout ? "Timeout" : "Stable";
             DynamicHits = 0;
             foreach (var probe in world.GetComponentsInChildren<ProjectileProbe>()) DynamicHits += probe.DynamicHits;
+            if (State == BattleState.Resolving) combat?.EndShot();
             if (State == BattleState.Resolving && Ammunition <= 0) { Finish(false); return; }
             LoadDrone();
             ChangeState(BattleState.Ready);
@@ -142,9 +186,11 @@ namespace SiegeDemo
         {
             if (State == BattleState.Won || State == BattleState.Lost) return;
             launcher.CancelAim();
+            combat?.EndShot();
             ResultCount++;
             ChangeState(won ? BattleState.Won : BattleState.Lost);
             Debug.Log("DEMO_RESULT: " + State + " shots=" + ShotsFired);
+            if (won && !legacyMode) CompleteLevel();
         }
     }
 }

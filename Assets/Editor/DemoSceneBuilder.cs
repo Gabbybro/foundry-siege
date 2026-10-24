@@ -11,6 +11,8 @@ public static class DemoSceneBuilder
 {
     public const string ScenePath = "Assets/Scenes/FoundryDemo.unity";
     public const string ConfigPath = "Assets/Content/DemoLevel.json";
+    public const string RunConfigPath = "Assets/Content/RunConfiguration.json";
+    public const string PlayerDirectory = "Builds/Windows-v0.2";
     [MenuItem("Siege Demo/Build/Generate playable scene")]
     public static void Configure()
     {
@@ -26,7 +28,15 @@ public static class DemoSceneBuilder
         camera.transform.position = new Vector3(.6f, 1.8f, -10);
         camera.backgroundColor = new Color(.055f,.075f,.095f);
         go.AddComponent<AudioListener>();
-        new GameObject("Battle Controller").AddComponent<BattleController>().Configure(source, camera);
+        var controller = new GameObject("Battle Controller").AddComponent<BattleController>();
+        controller.Configure(source, camera);
+        var runSource = AssetDatabase.LoadAssetAtPath<TextAsset>(RunConfigPath);
+        if (!runSource) throw new InvalidOperationException("Missing " + RunConfigPath);
+        RunConfiguration.Parse(runSource.text);
+        var paths = Directory.GetFiles("Assets/Content/Levels", "*.json");
+        Array.Sort(paths, StringComparer.Ordinal);
+        var levels = Array.ConvertAll(paths, path => AssetDatabase.LoadAssetAtPath<TextAsset>(path.Replace('\\', '/')));
+        controller.ConfigureRun(runSource, levels);
         PlayerSettings.productName = "Foundry Siege";
         PlayerSettings.defaultScreenWidth = 1600;
         PlayerSettings.defaultScreenHeight = 900;
@@ -61,14 +71,15 @@ public static class DemoSceneBuilder
         DemoValidation.Run(data);
         SiegeDemo.Editor.LevelConfigurationChecks.Run();
         LevelRoundTripValidation.Run(data);
+        RoguelikeValidation.Run();
         Debug.Log("PROJECT_VALIDATION_SUCCESS");
     }
     [MenuItem("Siege Demo/Build/Windows")]
     public static void BuildWindows()
     {
         Validate();
-        Directory.CreateDirectory("Builds/Windows");
-        var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes = new[] {ScenePath}, locationPathName="Builds/Windows/FoundrySiege.exe", target=BuildTarget.StandaloneWindows64, options=BuildOptions.Development | BuildOptions.StrictMode });
+        Directory.CreateDirectory(PlayerDirectory);
+        var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes = new[] {ScenePath}, locationPathName=PlayerDirectory + "/FoundrySiege.exe", target=BuildTarget.StandaloneWindows64, options=BuildOptions.Development | BuildOptions.StrictMode });
         if (report.summary.result != BuildResult.Succeeded) throw new InvalidOperationException("Build failed " + report.summary.result);
         Debug.Log("WINDOWS_BUILD_SUCCESS: " + report.summary.totalSize);
     }

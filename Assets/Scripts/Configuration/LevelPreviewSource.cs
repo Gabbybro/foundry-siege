@@ -9,6 +9,8 @@ namespace SiegeDemo
     {
         [HideInInspector] public string initialJson;
         [HideInInspector] public string sourcePath;
+        [HideInInspector] public string workingJson;
+        [HideInInspector] public string diskJson;
 
         private void Awake()
         {

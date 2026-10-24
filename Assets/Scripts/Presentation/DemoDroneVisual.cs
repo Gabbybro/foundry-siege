@@ -27,7 +27,7 @@ namespace SiegeDemo
             if (exhaust)
             {
                 exhaust.gameObject.SetActive(moving);
-                exhaust.localScale = new Vector3(.2f + .08f * Mathf.Sin(Time.unscaledTime * 48), .1f, 1);
+                exhaust.localScale = new Vector3(.2f + .08f * Mathf.Sin(Time.time * 48), .1f, 1);
             }
         }
     }

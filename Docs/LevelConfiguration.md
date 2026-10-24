@@ -1,5 +1,122 @@
 # 关卡配置与 Unity 搭建工具
 
+## v0.2 当前交付（2026-10-24）
+
+本节优先于后面的 v0.1 历史说明。保留旧 `DemoLevel.json` 及全部 `.meta`，新增九关、整轮参数、版本校验和材质编辑；共享 schema 仍由 `Core/DemoContracts.cs`、`RoguelikeContracts.cs` 定义。本模块未改 Core、SceneBuilder、项目设置，也未启动 Unity 或执行 Git 操作。
+
+### 入口和版本
+
+| 入口 | 内容 |
+| --- | --- |
+| `Assets/Content/RunConfiguration.json` | version=1 的整轮配置；正式路线、四练习的名称/说明/默认构筑、全部 AbilitySettings 数值 |
+| `Assets/Content/Levels/C01.json`～`C05.json` | version=2 的五个正式关；顺序 C01→C05，各 3 发，目标数 2/3/3/2/4 |
+| `Assets/Content/Levels/P01.json`～`P04.json` | version=2 的独立练习关，各 3 发，目标数 3/2/3/2；构筑定义在整轮配置中 |
+| `Assets/Content/DemoLevel.json` | v0.1 旧配置，保持原样可载入，不是 v0.2 九关之一 |
+| `RunConfiguration.Parse/Validate/Serialize` | 新的整轮参数 API，使用公共 RunConfigurationData |
+| `RunConfiguration.ValidateReferences(data, IDictionary<string,LevelData>)` | 对已载入目录检查缺关、ID 不一致、单关错误及三发规则，不在运行时扫描磁盘 |
+| `LevelConfiguration.Parse/Validate/Expand/Serialize` | 同时支持关卡 v1 和 v2；已有签名不变 |
+| `MaterialDefaults.Apply(part, material)` | 在保持身份、尺寸、角色、固定/地面/不可破坏标记的前提下切换材质数值 |
+
+整轮 version=1 和单关 version=2 属于两个不同文件格式。JSON 所有标量及设置对象必须显式提供；向量需要数字 x/y。不会接受 `"y":"-4.1"` 这样的字符串数字。校验从公共字段反射，不维护第二套 DTO；未知拼写、重复 JSON 字段、漏字段、错误类型、整数溢出和非有限 float 均报具体路径。
+
+关卡 v1 可以省略 id/material/isGround/indestructible。缺失材质为 Legacy=0，按原来的静态/Platform 不可破坏及 Platform 地面规则解释。v2 必须有 id，且每个零件必须写出 material、isGround、indestructible，即使值为 false 也不能省略；不依赖 JSON 属性顺序。v2 不允许 Legacy。语义校验还检查库和模板引用、展开 ID、初始位置、发射弹体重叠及构件的矩形穿插；穿插检测包含旋转，容许 0.02m 接触误差。接触稳定性仍需要物理实测，几何通过不等于开场稳定。
+
+### 材质与独立覆盖
+
+MaterialId：Wood=1、Glass=2、Stone=3、Metal=4。v2 的 isStatic 仅控制是否固定，indestructible 控制是否可破坏，isGround 控制地面规则。固定木墙可以被破坏；动态石块可以不可破坏；三者不按名称或材质自动互相推导。关卡目标必须动态、可破坏且不是地面；地面必须固定。普通石材预设耐久较高但可破坏，只有显式 indestructible=true 的掩体无损。
+
+| 切换预设 | mass | hitPoints | impulseThreshold | damageMultiplier | friction | bounciness |
+| --- | --- | --- | --- | --- | --- | --- |
+| Wood | 1.4 | 8 | 1.5 | 1 | 0.70 | 0 |
+| Glass | 0.65 | 3 | 0.7 | 1.35 | 0.45 | 0 |
+| Stone | 5 | 28 | 3 | 0.65 | 0.80 | 0 |
+| Metal | 3 | 16 | 3 | 0.75 | 0.65 | 0 |
+
+这些是每件零件的作者预设，不按体积自动换算质量或耐久。已有 JSON 各字段都是明确覆盖值；更改 JSON 的 material 整数不会隐式覆盖其他数字，避免修改一种数值时意外重平衡全部属性。要执行“切换材质并采用默认参数”，在代码调用 Apply 后再单独改字段，或使用编辑器材质菜单：
+
+```csharp
+MaterialDefaults.Apply(part, MaterialId.Stone);
+part.mass = 3.5f;        // 仅覆盖质量
+part.hitPoints = 20;     // 仅覆盖耐久，其余仍用石材预设
+```
+
+在 Edit 模式 Load 任一 v2 JSON，选中带 Marker 的零件，执行 `Siege Demo/Level/Material/Wood defaults`（也有 Glass/Stone/Metal）。工具为选中对象创建独立零件库条目，不修改所有共用原 partId 的对象；尺寸、位置和三种标记保留，替换数值立即在预览重建。改动先留在 workingJson 草稿，只有 Save 才写磁盘。Reset 恢复载入/上次保存快照。源文件被外部改动仍会阻止覆盖，不会把材质草稿误判为外部冲突。
+
+### 能力字段与首轮参数
+
+所有参数位于 RunConfiguration.json 的 abilities 中，下面列出全部字段。除列出的角度/比例范围外，正值必须有限且 >0，非负值必须有限且 >=0。
+
+| 分组 | 字段和当前值 | 含义/校验 |
+| --- | --- | --- |
+| split | speed=18，spreadAngle=18，radiusScale=0.58 | 固定子弹速度；中线到单侧夹角 0～89.9°；半径比例 >0 且 <1。3 枚和质量各 1/3 是规则，非数量参数 |
+| dash | speedIncrement=10，centerAngle=0，angleWidth=360 | 当前速率加正增量；中心角为有限角度，宽度 >0 且 <=360°；不配置无重力阶段 |
+| piercing | minimumSpeed=6，maximumThickness=1.2，speedRetention=0.82 | 最低速度非负、最大厚度正值、保速 0～1；一次只穿一个木构件 |
+| groundBounce | verticalMultiplier=1，minimumUpSpeed=9，horizontalRetention=0.85 | 竖直系数非负、最小起跳速度正值、水平保留 0～1 |
+| stoneRicochet | maximumGlancingAngle=30，speedRetention=0.85，minimumUpSpeed=9 | 相对表面切线的角度 0～89.9°；保速 0～1、最小向上速度正值 |
+| apexDive | downSpeed=18，horizontalRetention=0.55 | 向下速度正值、水平保留 0～1；只赋值一次 |
+| rest | stableSeconds=0.6，countdownSeconds=1，maximumSpeed=0.3，maximumAngularSpeed=20 | 两个时长正值；低速阈值非负；支撑/打断规则由正式能力实现 |
+| explosion | radius=4，damage=12，impulse=9，falloffPower=1 | 半径和衰减幂正值，直接伤害与推力非负且彼此独立 |
+| deathShock | radius=3.4，damage=9，impulse=8，falloffPower=1 | 同上；衰减为 pow(clamp01(1-distance/radius),falloffPower) |
+| shards | speed=18，spreadAngle=30，mass=0.25，radius=0.1，lifetime=6 | 速度/质量/半径/寿命正值；两破片总夹角 0～180°。2 枚和每原始发射一次是规则 |
+
+主动 ID 为 Split=1、Dash=2；练习默认不允许 None=0。被动 ID：WoodPiercing=0、GroundBounce=1、RestExplosion=2、DeathShock=3、GlassShards=4、StoneRicochet=5、ApexDive=6。被动列表不能含未知值或重复值。正式路线与练习入口校验唯一性和本版固定 ID；练习必须有名称、操作说明及明确构筑。正式升级的等概率、三选一、已有项移池由 Core 流程实现，不在 JSON 添加一套权重/刷新规则。
+
+### 九关布局与预计路线
+
+所有地面顶部 -3.6，发射点 (-9,-2.4)，最大速度 20；木承重柱宽 0.4～0.45m，弹性为 0。布局是独立数据，不以改名称复用相同场景。以下均为供集成试玩验证的预计解法，并非已通过结论。
+
+| ID/目标数 | 真实布局与预计基础路线 | 组合路线/观察 |
+| --- | --- | --- |
+| C01 / 2 | x=1、3 的木柱承 x=2 横梁，敌人在底层和梁上；低抛拆前柱压倒，剩余两发处理残敌 | 分裂打两柱，冲刺修正后柱；无被动也可拆支撑 |
+| C02 / 3 | x=-0.8 固定可破坏木墙，底侧留 0.7m 缺口；后方 x=3 矮架有上下两敌，x=7 木架有一敌 | 基础高抛越墙，或首发拆墙再打内部架；穿木不是必需条件 |
+| C03 / 3 | x=1、5 两木柱托玻璃桥，桥上敌、桥下敌与 x=7 侧架敌；桥左上放独立木配重 | 基础直接碎桥/打支撑产生坠落；破片与死亡冲击仅在对应被动存在时额外触发 |
+| C04 / 2 | x=-6.8 的 24° 石斜面，x=-1 不可破坏固定石墙；墙后显式地面条，x=5.4 木台上两敌 | 可直接高抛越墙拆木台；也可擦石抬升或墙后下冲反弹。掩体不靠 HP 数字冒充不可破坏 |
+| C05 / 4 | 前排低石掩体，x=2.5 双柱玻璃顶有上下两敌，x=7 双柱木堡有上下两敌 | 三个弱点是前柱、玻璃顶、后承重点；预期靠一次倒塌覆盖多敌，以保留三发基础解法 |
+| P01 / 3 | x=-2 固定可破坏木外墙；x=1.3 三段独立木内层；三个目标位于地面及两级固定窄台 | 默认 Split+[WoodPiercing]。墙前分裂，或母体穿外墙后分裂，检查子弹独立穿内层。上方保留高抛入口 |
+| P02 / 2 | x=-2.8 石墙，墙后空落地区；x=5 木台下可攻击，台上两敌 | 默认 Dash+[GroundBounce]。越墙后向落地区下冲，触地向上打木台底部；可高抛直击 |
+| P03 / 3 | x=0.3 薄玻璃，首敌 x=1.2；后方弱双柱托两敌，死亡冲击可破坏支撑；首敌 HP=2.4 | 默认 Dash+[GlassShards,DeathShock]。直接撞玻璃，破片杀近敌，再冲击弱架引发坠落。提供未放置的 occlusion-variant 遮挡板模板，作遮挡对照 |
+| P04 / 2 | 发射侧 x=-6.8、24° 斜石，x=-1.5 高石墙；墙后两组木顶与下方目标 | 默认 Dash+[StoneRicochet,ApexDive]。约5°重档在首次顶点前擦石，新抛物线越墙后俯冲砸后木顶；保留高抛路线 |
+
+P03 遮挡对照：在 structures 加 `{"id":"shield-test","templateId":"occlusion-variant","position":{"x":0,"y":0},"rotation":0}`，会在 x=1.8 放置落地的可移动木板。原始样例不放此板；对照版应另存。遮挡需验证直接伤害和推力都阻断，不能用观察到后续倒塌就断定直接伤害穿透。
+
+### 修改、预览和试射流程
+
+1. 在 Unity 外编辑 JSON：关卡摆放/库参数改 Levels/*.json，共用能力值及练习构筑改 RunConfiguration.json。完整保留必填字段和数字类型。
+2. 关卡使用 `Siege Demo/Level/Load JSON...`；场景调整位置/角度、复制后改 Marker ID、删除或用材质预设菜单。Save 会展开到 objects，保留 v2 id/材质/标记/库/模板和其余参数。
+3. 选中 RunConfiguration TextAsset 后执行原 Validate 菜单，或执行 `Siege Demo/Run/Validate configuration and nine levels`，可同时检查整轮参数和目录。纯代码使用 Parse/ValidateReferences。
+4. `Reset and test saved JSON` 是所选已保存单关的**无主动/被动基础物理试射**：临时清空控制器 runSource 走现有单关入口，退出 Play 后自动恢复原来的 levelSource/runSource 引用。它不伪造正式通关或奖励；组合请正常进入 Play 后从主菜单的对应练习入口进入，正式流程从开局选主动进入。引用恢复与菜单交互仍待管理端真实验收。
+5. 合法变更必须在 Unity 导入并重新 Validate、Build、运行检查后才交付 Windows 包。TextAsset 被编入玩家数据，当前模块不实现 Windows 外置 JSON 热加载；改工程文件不会自动改变已经构建的 exe。
+
+现有 Play 期间载入/保存/捕获禁止、初始快照与运行现场分离、外部文件冲突保护、写临时文件再替换等防护均保留。workingJson 仅是场景作者草稿；不从倒塌实体反推初始配置。
+
+### 验证入口与证据边界
+
+本轮模块实际执行：
+
+- 外部编译：`.setup/ConfigurationChecks/ProductionCompile.csproj`，引用锁定 Unity Engine/Editor 程序集，模块全部代码 0 警告、0 错误；Core 集成类型使用签名占位。
+- 外部回归：`.setup/ConfigurationChecks/RunChecks.csproj`，旧配置 41 项、新版 67 项通过。新版包括九关正确目标数/三发/完整读写/展开、目录引用、v2 漏字段、错误类型与材质、初始穿插、固定与不可破坏分离、材质预设及独立覆盖、能力非法值/拼写/重复被动。运行的是实际配置源码，原生 JsonUtility 使用 System.Text.Json 适配器替代，未启动 Unity。
+- 模块范围 `git diff --check -- Assets/Scripts/Configuration Assets/Editor/LevelAuthoring Assets/Content Docs/LevelConfiguration.md` 通过。没有自行生成 `.meta`、提交或推送。
+
+已交付供管理端运行的真实 Unity 检查：
+
+- `SiegeDemo.Editor.LevelConfigurationChecks.Run()`：保留 v1 检查，文件存在时自动接续新版只读检查。
+- `SiegeDemo.Editor.RoguelikeConfigurationChecks.Run()`：真实 JsonUtility 的九关完整读写/目标/引用/材质/非法配置；不生成场景、不修改配置。
+- `SiegeDemo.Editor.RoguelikeConfigurationChecks.RunAuthoring()`：在没有 Level Preview 的活动场景中，复制 P01 到忽略的 .setup/validation，载入并把固定可破坏木外墙切为玻璃，验证尺寸/固定/可破坏保留、草稿不写盘、v2 Save/Load 保留身份/库/模板。原始 P01 不改。该入口会短暂创建预览并清理；由管理端统一调用。
+
+| 验收类别 | 最终版本需验证的结果 |
+| --- | --- |
+| 正常 | 全九关 Parse、场景载入、开场稳定；全部数值写回一致；改一项合法 ability 参数后进入对应练习实际观察变化 |
+| 重复 | 重复载入无多余根，重复保存不增库条目；重复 ID/练习引用/被动拒绝；材质切换只影响选中对象 |
+| 重置 | 材质草稿/位置未保存时 Reset 回载入快照；试射不改源；退出 Play 恢复控制器引用；重复正式/练习重试不污染配置 |
+| 异常 | v2 缺 id/material/isGround/indestructible、字符串坐标、未知材质/能力、非法有限值/比例、缺关、穿插均定位；错误加载不破坏旧预览，错误保存不改磁盘 |
+| 物理与流程 | 正式九关布局实测、正式各三发基础解法、P01～P04 动作顺序、遮挡变体，以及两主动/七被动/整轮与奖励流程由 root 和战斗模块验证 |
+
+本模块没有把上述 Unity 入口或物理路线标记为通过。v0.1 的历史成功日志不算 v0.2 的证据；管理端完成集成后按实际日志更新交付状态。
+
+---
+
+## v0.1 历史交付说明
+
 Configuration 模块，2026-10-24。使用公共命名空间 `SiegeDemo` 和 `Core/DemoContracts.cs`，没有第二套数据模型。编辑器工具位于 `SiegeDemo.Editor`。目标版本固定为 Unity 6000.3.27f1。
 
 ## 文件与数据源

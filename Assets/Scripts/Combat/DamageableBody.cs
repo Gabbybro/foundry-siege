@@ -14,6 +14,8 @@ namespace SiegeDemo
         public float HitPoints { get; private set; }
         public bool IsDestroyed { get; private set; }
         public bool IsTarget { get; private set; }
+        public DamageSource LastDamageSource { get; private set; }
+        public bool IsIndestructible => immutable;
         public event Action<DamageableBody> Destroyed;
         /// <summary>The float is actual HP removed, excluding overkill.</summary>
         public event Action<DamageableBody, float> Damaged;
@@ -36,16 +38,34 @@ namespace SiegeDemo
             impulseThreshold = definition.impulseThreshold;
             damageMultiplier = definition.damageMultiplier;
             IsTarget = definition.kind == PartKind.Target;
-            immutable = definition.isStatic || definition.kind == PartKind.Platform;
+            immutable = definition.indestructible || (definition.material == MaterialId.Legacy &&
+                (definition.isStatic || definition.kind == PartKind.Platform));
+            LastDamageSource = default;
             initializedSession = SessionVersion;
             initialized = true;
         }
 
         public void ApplyImpact(float impulse, float approachSpeed)
+            => ApplyImpact(impulse, approachSpeed, new DamageSource { kind = DamageKind.Collision });
+
+        public void ApplyImpact(float impulse, float approachSpeed, DamageSource source)
         {
             if (!initialized || initializedSession != SessionVersion || IsDestroyed || !isActiveAndEnabled || immutable) return;
             float damage = ImpactCollision.CalculateDamage(impulse, approachSpeed, impulseThreshold, damageMultiplier, HitPoints);
+            ApplyDamage(damage, source);
+        }
+
+        public void ApplyDirectDamage(float amount, DamageSource source)
+        {
+            if (!initialized || initializedSession != SessionVersion || IsDestroyed || !isActiveAndEnabled || immutable ||
+                !ImpactCollision.Finite(amount) || amount <= 0) return;
+            ApplyDamage(Mathf.Min(amount, HitPoints), source);
+        }
+
+        private void ApplyDamage(float damage, DamageSource source)
+        {
             if (damage <= 0) return;
+            LastDamageSource = source;
             HitPoints = Mathf.Max(0, HitPoints - damage);
             DamageEvents++;
             if (HitPoints <= 0)
@@ -62,6 +82,7 @@ namespace SiegeDemo
         public void Eliminate()
         {
             if (!initialized || initializedSession != SessionVersion || IsDestroyed) return;
+            LastDamageSource = new DamageSource { kind = DamageKind.Boundary };
             BeginDestruction();
             FinishDestruction();
         }

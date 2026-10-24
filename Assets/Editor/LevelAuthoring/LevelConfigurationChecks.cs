@@ -55,6 +55,7 @@ namespace SiegeDemo.Editor
             RejectJson("null", "$");
             Require(LevelConfiguration.Parse(source).ammunition == original.ammunition, "reloading restores baseline");
             Debug.Log("LEVEL_CONFIGURATION_CHECKS_SUCCESS: roundtrip, rotation, immutable expansion, duplicate IDs, reset, invalid JSON and references (real JsonUtility)");
+            if (File.Exists(RunConfiguration.AssetPath)) RoguelikeConfigurationChecks.Run();
         }
         private static void Reject(LevelData baseline, Action<LevelData> mutation, string path)
         {

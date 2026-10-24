@@ -4,7 +4,7 @@ using static SiegeDemo.DemoPrimitives;
 
 namespace SiegeDemo
 {
-    internal sealed class DemoHud
+    internal sealed partial class DemoHud
     {
         private readonly Font font;
         private readonly bool ownsFont;
@@ -181,7 +181,7 @@ namespace SiegeDemo
             else
             {
                 string help = session.State == BattleState.Ready ? (compact ? "反向拖拽 · 松开发射 · 缩回取消" : "按住无人机向左下拖拽，松开发射；缩回取消")
-                    : session.State == BattleState.Preparing ? "结构就位后自动装填第一发" : "点击右上角「重新开始」再次试射";
+                    : session.State == BattleState.Preparing ? "结构就位后自动装填第一发" : session is IRunSession ? "关卡已结算 · 等待下一阶段" : "点击右上角「重新开始」再次试射";
                 Text(new Rect(helpX, y + 38, helpWidth - 12, 29), help, small, Muted);
             }
         }

@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "campaignLevels": ["C01", "C02", "C03", "C04", "C05"],
+  "practices": [
+    {
+      "levelId": "P01", "name": "穿墙分流",
+      "instructions": "重档低抛。可在外层木墙前分裂；也可先穿外墙，再在内层前分裂，观察三枚子弹各自穿过一块木构件。上方保留高抛入口。",
+      "build": { "active": 1, "passives": [0] }
+    },
+    {
+      "levelId": "P02", "name": "冲地折返",
+      "instructions": "重档越过前墙，再点击墙后、木台前的地面向下冲刺。触地反弹后由下方撞木台。也可直接高抛击台；一次发射只能冲刺一次。",
+      "build": { "active": 2, "passives": [1] }
+    },
+    {
+      "levelId": "P03", "name": "玻璃导爆",
+      "instructions": "低抛直接撞碎玻璃，让两枚破片击杀近处敌人，观察死亡冲击推动弱木架，再由倒塌消灭后续目标。碎片每次原始发射只产生一组。",
+      "build": { "active": 2, "passives": [4, 3] }
+    },
+    {
+      "levelId": "P04", "name": "石面俯冲",
+      "instructions": "重档约 5 度擦过近处斜石，先抬升越墙，再在新的自然顶点自动俯冲砸木顶。对比正撞和擦撞；另可直接高抛。主动可保留不用。",
+      "build": { "active": 2, "passives": [5, 6] }
+    }
+  ],
+  "abilities": {
+    "split": { "speed": 18.0, "spreadAngle": 18.0, "radiusScale": 0.58 },
+    "dash": { "speedIncrement": 10.0, "centerAngle": 0.0, "angleWidth": 360.0 },
+    "piercing": { "minimumSpeed": 6.0, "maximumThickness": 1.2, "speedRetention": 0.82 },
+    "groundBounce": { "verticalMultiplier": 1.0, "minimumUpSpeed": 9.0, "horizontalRetention": 0.85 },
+    "stoneRicochet": { "maximumGlancingAngle": 30.0, "speedRetention": 0.85, "minimumUpSpeed": 9.0 },
+    "apexDive": { "downSpeed": 18.0, "horizontalRetention": 0.55 },
+    "rest": { "stableSeconds": 0.6, "countdownSeconds": 1.0, "maximumSpeed": 0.3, "maximumAngularSpeed": 20.0 },
+    "explosion": { "radius": 4.0, "damage": 12.0, "impulse": 9.0, "falloffPower": 1.0 },
+    "deathShock": { "radius": 3.4, "damage": 9.0, "impulse": 8.0, "falloffPower": 1.0 },
+    "shards": { "speed": 18.0, "spreadAngle": 30.0, "mass": 0.25, "radius": 0.1, "lifetime": 6.0 }
+  }
+}

@@ -38,7 +38,8 @@ namespace SiegeDemo
         {
             var errors = new List<string>();
             if (data == null) { errors.Add("$: 关卡数据不能为空"); return errors; }
-            if (data.version != 1) errors.Add("version: 仅支持版本 1");
+            if (data.version != 1 && data.version != 2) errors.Add("version: 仅支持版本 1 或 2");
+            if (data.version == 2 && (string.IsNullOrEmpty(data.id) || !Identifier.IsMatch(data.id))) errors.Add("id: 版本 2 必须提供合法关卡 ID");
             if (string.IsNullOrWhiteSpace(data.name)) errors.Add("name: 关卡名称不能为空");
             if (data.ammunition < 1 || data.ammunition > 100) errors.Add("ammunition: 必须是 1～100 的整数");
             CheckVector(data.launcher, "launcher", errors);
@@ -59,6 +60,7 @@ namespace SiegeDemo
                 if (part == null) { errors.Add(path + ": 零件不能为空"); continue; }
                 CheckId(part.id, path + ".id", partIds, errors);
                 if (!Enum.IsDefined(typeof(PartKind), part.kind)) errors.Add(path + ".kind: 未定义的零件种类");
+                if (!Enum.IsDefined(typeof(MaterialId), part.material) || (data.version == 2 && part.material == MaterialId.Legacy)) errors.Add(path + ".material: 版本 2 只允许 Wood=1、Glass=2、Stone=3、Metal=4；Legacy=0 仅兼容旧关卡");
                 Positive(part.size.x, path + ".size.x", errors);
                 Positive(part.size.y, path + ".size.y", errors);
                 Positive(part.mass, path + ".mass", errors);
@@ -68,7 +70,10 @@ namespace SiegeDemo
                 Range(part.friction, 0, 1, path + ".friction", errors);
                 Range(part.bounciness, 0, 1, path + ".bounciness", errors);
                 if (part.kind == PartKind.Target && part.isStatic) errors.Add(path + ".isStatic: 目标必须是动态刚体");
-                if (part.kind == PartKind.Platform && !part.isStatic) errors.Add(path + ".isStatic: 固定平台必须为 true");
+                if (data.version == 1 && part.kind == PartKind.Platform && !part.isStatic) errors.Add(path + ".isStatic: 旧版固定平台必须为 true");
+                if (data.version == 2 && part.kind == PartKind.Target && part.indestructible) errors.Add(path + ".indestructible: 关卡目标不能不可破坏");
+                if (data.version == 2 && part.kind == PartKind.Target && part.isGround) errors.Add(path + ".isGround: 目标不能标为地面");
+                if (data.version == 2 && part.isGround && !part.isStatic) errors.Add(path + ".isGround: 地面必须固定，但 indestructible 独立设置");
             }
 
             var directIds = new HashSet<string>(StringComparer.Ordinal);
@@ -116,8 +121,43 @@ namespace SiegeDemo
                     if (parts[item.partId].kind == PartKind.Target) hasTarget = true;
                 }
                 if (!hasTarget) errors.Add("objects/structures: 关卡必须放置至少一个目标 (kind=1)");
+                if (data.version == 2 && errors.Count == 0) CheckGeometry(expanded, parts, data, errors);
             }
             return errors;
+        }
+
+        private static void CheckGeometry(List<Placement> objects, Dictionary<string, PartDefinition> parts, LevelData data, List<string> errors)
+        {
+            bool hasGround = false;
+            for (int i = 0; i < objects.Count; i++)
+            {
+                var a = objects[i];
+                var partA = parts[a.partId];
+                hasGround |= partA.isGround;
+                double angle = (a.rotation % 360.0) * Math.PI / 180;
+                double cosine = Math.Cos(angle), sine = Math.Sin(angle);
+                double dx = data.launcher.x - a.position.x, dy = data.launcher.y - a.position.y;
+                double localX = dx * cosine + dy * sine, localY = -dx * sine + dy * cosine;
+                double distanceX = Math.Max(0, Math.Abs(localX) - partA.size.x / 2.0);
+                double distanceY = Math.Max(0, Math.Abs(localY) - partA.size.y / 2.0);
+                if (distanceX * distanceX + distanceY * distanceY < Math.Pow(Math.Max(0, data.launch.projectileRadius - .01), 2)) errors.Add("expanded['" + a.id + "']: 与 launcher 初始弹体重叠");
+                for (int j = i + 1; j < objects.Count; j++)
+                    if (Overlaps(a, partA, objects[j], parts[objects[j].partId])) errors.Add("expanded['" + a.id + "']/expanded['" + objects[j].id + "']: 初始构件明显穿插（容差 0.02m）");
+            }
+            if (!hasGround) errors.Add("parts[].isGround: 版本 2 必须放置至少一个显式地面");
+        }
+        private static bool Overlaps(Placement a, PartDefinition partA, Placement b, PartDefinition partB)
+        {
+            double aa = (a.rotation % 360.0) * Math.PI / 180, ab = (b.rotation % 360.0) * Math.PI / 180;
+            double ax = Math.Cos(aa), ay = Math.Sin(aa), bx = Math.Cos(ab), by = Math.Sin(ab);
+            double dx = (double)b.position.x - a.position.x, dy = (double)b.position.y - a.position.y;
+            return Axis(ax, ay) && Axis(-ay, ax) && Axis(bx, by) && Axis(-by, bx);
+            bool Axis(double x, double y)
+            {
+                double ra = partA.size.x * .5 * Math.Abs(ax * x + ay * y) + partA.size.y * .5 * Math.Abs(-ay * x + ax * y);
+                double rb = partB.size.x * .5 * Math.Abs(bx * x + by * y) + partB.size.y * .5 * Math.Abs(-by * x + bx * y);
+                return ra + rb - Math.Abs(dx * x + dy * y) > .02;
+            }
         }
 
         private static List<Placement> ExpandUnchecked(LevelData data)

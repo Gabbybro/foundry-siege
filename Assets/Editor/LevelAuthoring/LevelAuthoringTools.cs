@@ -50,7 +50,8 @@ namespace SiegeDemo.Editor
             {
                 RequireEditMode();
                 var selected = Selection.activeObject as TextAsset;
-                if (selected) LevelConfiguration.Parse(selected.text);
+                if (selected && AssetDatabase.GetAssetPath(selected) == RunConfiguration.AssetPath) RunConfiguration.Parse(selected.text);
+                else if (selected) LevelConfiguration.Parse(selected.text);
                 else if (FindPreview()) CapturePreview();
                 else LevelConfiguration.Parse(File.ReadAllText(DefaultPath));
                 Debug.Log("LEVEL_CONFIGURATION_VALID: JSON 字段、引用、展开 ID 与位置检查通过");
@@ -93,9 +94,13 @@ namespace SiegeDemo.Editor
                 var source = AssetDatabase.LoadAssetAtPath<TextAsset>(assetPath);
                 if (!source) throw new InvalidOperationException("无法导入 JSON TextAsset: " + assetPath);
                 LoadPreview(json, path);
+                LevelTrialBinding.Arm(controllers[0]);
                 controller.FindProperty("levelSource").objectReferenceValue = source;
+                var runSource = controller.FindProperty("runSource");
+                if (runSource != null) runSource.objectReferenceValue = null;
                 controller.ApplyModifiedProperties();
                 EditorSceneManager.MarkSceneDirty(controllers[0].gameObject.scene);
+                Debug.Log("LEVEL_AUTHORING_BASIC_TRIAL: 单关基础物理，无主动/被动；组合验证请退出 Play 后从主菜单练习入口进入。");
                 EditorApplication.isPlaying = true;
             });
         }
@@ -123,6 +128,8 @@ namespace SiegeDemo.Editor
                 var snapshot = staging.AddComponent<LevelPreviewSource>();
                 snapshot.initialJson = json;
                 snapshot.sourcePath = FullPath(sourcePath);
+                snapshot.workingJson = json;
+                snapshot.diskJson = json;
             }
             catch { UnityEngine.Object.DestroyImmediate(staging); throw; }
             Undo.IncrementCurrentGroup();
@@ -142,7 +149,7 @@ namespace SiegeDemo.Editor
         {
             RequireEditMode();
             var preview = GetPreview();
-            var data = LevelConfiguration.Parse(preview.initialJson);
+            var data = LevelConfiguration.Parse(string.IsNullOrEmpty(preview.workingJson) ? preview.initialJson : preview.workingJson);
             var parts = new Dictionary<string, PartDefinition>(StringComparer.Ordinal);
             foreach (var part in data.parts) parts.Add(part.id, part);
             var placements = new List<Placement>();
@@ -182,7 +189,7 @@ namespace SiegeDemo.Editor
             var preview = GetPreview();
             string absolute = FullPath(path);
             if (!string.Equals(Path.GetExtension(absolute), ".json", StringComparison.OrdinalIgnoreCase)) throw new ArgumentException("保存路径必须使用 .json 扩展名", nameof(path));
-            if (string.Equals(absolute, FullPath(preview.sourcePath), StringComparison.OrdinalIgnoreCase) && File.Exists(absolute) && File.ReadAllText(absolute) != preview.initialJson)
+            if (string.Equals(absolute, FullPath(preview.sourcePath), StringComparison.OrdinalIgnoreCase) && File.Exists(absolute) && File.ReadAllText(absolute) != (preview.diskJson ?? preview.initialJson))
                 throw new IOException("源 JSON 已被其他工具修改；请先重新载入，或另存新文件，避免覆盖外部改动: " + absolute);
             string json = LevelConfiguration.Serialize(CapturePreview());
             string directory = Path.GetDirectoryName(absolute);
@@ -197,11 +204,53 @@ namespace SiegeDemo.Editor
             Undo.RecordObject(preview, "更新关卡预览基线");
             preview.initialJson = json;
             preview.sourcePath = absolute;
+            preview.workingJson = json;
+            preview.diskJson = json;
             EditorUtility.SetDirty(preview);
             EditorSceneManager.MarkSceneDirty(preview.gameObject.scene);
             string assetPath = AssetPath(absolute);
             if (assetPath != null) AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
             Debug.Log("LEVEL_PREVIEW_SAVED: " + absolute);
+        }
+
+        [MenuItem("Siege Demo/Level/Material/Wood defaults")]
+        private static void WoodMenu() { Report(() => ChangeSelectedMaterial(MaterialId.Wood)); }
+        [MenuItem("Siege Demo/Level/Material/Glass defaults")]
+        private static void GlassMenu() { Report(() => ChangeSelectedMaterial(MaterialId.Glass)); }
+        [MenuItem("Siege Demo/Level/Material/Stone defaults")]
+        private static void StoneMenu() { Report(() => ChangeSelectedMaterial(MaterialId.Stone)); }
+        [MenuItem("Siege Demo/Level/Material/Metal defaults")]
+        private static void MetalMenu() { Report(() => ChangeSelectedMaterial(MaterialId.Metal)); }
+
+        public static void ChangeSelectedMaterial(MaterialId material)
+        {
+            RequireEditMode();
+            var preview = GetPreview();
+            var selected = Selection.activeGameObject ? Selection.activeGameObject.GetComponent<LevelObjectMarker>() : null;
+            if (!selected || !selected.transform.IsChildOf(preview.transform)) throw new InvalidOperationException("请选中 Level Preview 内带 LevelObjectMarker 的构件。");
+            string selectedId = selected.objectId;
+            LevelData data = CapturePreview();
+            if (data.version != 2) throw new InvalidOperationException("材质切换需要显式字段的版本 2 关卡；旧 DemoLevel 保持原样。");
+            var placement = Array.Find(data.objects, item => item.id == selected.objectId);
+            var source = Array.Find(data.parts, item => item.id == placement.partId);
+            var replacement = JsonUtility.FromJson<PartDefinition>(JsonUtility.ToJson(source));
+            string prefix = source.id + "-" + material.ToString().ToLowerInvariant();
+            string id = prefix;
+            int suffix = 1;
+            while (Array.Exists(data.parts, item => item.id == id)) id = prefix + "-" + suffix++;
+            replacement.id = id;
+            MaterialDefaults.Apply(replacement, material);
+            var library = new List<PartDefinition>(data.parts) { replacement };
+            data.parts = library.ToArray();
+            placement.partId = id;
+            string original = preview.initialJson, disk = preview.diskJson ?? preview.initialJson, path = preview.sourcePath;
+            string json = LevelConfiguration.Serialize(data);
+            var rebuilt = LoadPreview(json, path).GetComponent<LevelPreviewSource>();
+            rebuilt.initialJson = original;
+            rebuilt.diskJson = disk;
+            foreach (var marker in rebuilt.GetComponentsInChildren<LevelObjectMarker>())
+                if (marker.objectId == selectedId) { Selection.activeGameObject = marker.gameObject; break; }
+            EditorUtility.SetDirty(rebuilt);
         }
 
         private static LevelPreviewSource FindPreview()

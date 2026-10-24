@@ -1,4 +1,107 @@
-# Combat 模块交付说明
+# Combat 模块 v0.2
+
+日期：2026-10-24（Asia/Shanghai）。当前实现以 `DemoIntegrationContract.md` 的 v0.2 契约、`RoguelikeContracts.cs` 和白皮书快照 12.2/12.6/12.7 为准。下方保留 v0.1 历史记录，冲突处以本节为准。
+
+## v0.2 文件和接入
+
+新增 `CombatRuntime.cs`、`CombatRuntime.Effects.cs`、`CombatProjectile.cs`、`CombatRules.cs`、`PiercingGeometry.cs`、`Validation/CombatRegression.cs`；增量修改 `DamageableBody.cs`、`ImpactCollision.cs`、`LauncherController.cs`。现有 `.meta` 保留，新文件由管理者统一导入。未修改 Core、场景、构建、Packages 或 Git 状态。
+
+```csharp
+DamageableBody.ResetSession(); // root 同时清旧世界并从入关快照重建。
+// 工厂对每个构件 Initialize PartSurface / DamageableBody，包括固定构件。
+combat.Configure(new CombatContext {
+    world = world, generation = generation, level = level,
+    build = build, settings = runConfiguration.abilities,
+    onEvent = message => HandleFeedback(message),
+    onProjectileCreated = (go, kind) => DecorateFromRoot(go, kind)
+});
+
+// root 已将原弹切 Dynamic，赋予一次初速度，而且原弹已有 ProjectileProbe。
+combat.BeginShot(originalBody, shotId);
+bool accepted = combat.TryUseActive(clickedWorldPoint, out string reason);
+bool stillResolving = combat.HasUnsettledEffects;
+
+// 装填、超时、胜利收尾、重试、换关或退出时清理本发。
+combat.EndShot(); // 不制造爆炸；不删场景构件。
+```
+
+`Configure` 要求经过配置模块校验的完整 AbilitySettings、BuildLoadout 和 LevelData；内部复制构筑，并保留参数对象供当前关使用。先清旧本发，再解除旧世界订阅，绑定新世界。`BeginShot` 为每次原发新建 ShotContext；projectileId 在当前关单调递增，generation/shotId 随所有事件与弹体保留。调用方不应在一次能力执行的回调中再次改变物理参数；`onProjectileCreated` 用于装饰，不创建另一份能力逻辑。
+
+## 两主动与输入
+
+- 分裂：只允许仍在空中的原弹，每原发一次。读取发动瞬间 **实际** `Body.linearVelocity` 的方向，近零速才回退最近有效方向。母体禁用并移除，在同一中心创建三个较小子体，分别为实际质量的 1/3、固定配置速度、方向为中线及 ±spreadAngle；子体两两忽略碰撞。出生位置不向前平移，避免凭生成越过障碍。替换不触发停驻／死亡／爆破；子体没有新主动。
+- 冲刺：有效点击方向必须落在画面固定的中心角／范围宽度内；点击中心、非法坐标或越界方向不扣主动。速度为发动瞬间实际速率加 speedIncrement，沿点击方向只赋一次速度，随后正常重力、阻尼、碰撞。初始 360° 可由配置限制。
+- 保留 v0.1 已验证的 OnGUI 原始 MouseDown/Drag/Up 坐标流程，避免快拖起点被轮询终点覆盖。发射只由 MouseUp，主动只由后续新 MouseDown，且不接受发射同一帧的主动。实际收到发射 MouseUp 后无需额外空闲帧，可在下一帧接受新按下。
+- 会话为 IRunSession 时，每次指针交互调用 `IsPointerBlocked`，并检查 Battle phase、IsPaused、相机范围、IMGUI 捕获；旧单关仍保留固定 HUD 区域保护。Escape 在 Battle 切换暂停，即使 Time.timeScale 已为 0 也可继续；暂停、右键、失焦、重试与禁用组件取消手势。
+
+## 七被动和单发额度
+
+| 被动 | 已实现的规则 |
+| --- | --- |
+| 穿木 | 每原弹／每分裂子弹各一次，只穿一块 BoxCollider2D 木构件。先正常碰撞伤害，再沿入射方向按比例保速越过；门槛不足不耗次数。厚度沿入射射线在旋转后的真实盒体内计算；出口考虑弹体半径，CircleCast 检查出口路径，发现后方／重叠其他实体则拒绝穿越，不跳过第二堵墙。不额外扣穿透伤害。 |
+| 触地反弹 | 每体一次。明确 IsGround 且从上方接触、撞前向下时发动；竖直按向下速率乘系数转向上，受最低起跳速度约束；水平按比例保留。同接触为地面时不再尝试石面跳弹。 |
+| 石面跳弹 | 每体一次，按相对表面切线的夹角判定。成功擦撞才耗次数，向上且保持原水平前进侧；正撞走普通物理且不耗机会。 |
+| 顶点俯冲 | 每体一次，水平乘保留比例，竖直设为负 downSpeed。自然上升到下降的跨越才触发；任何碰撞／冲刺改向都会重置顶点观察基线，强制向下不会被自然顶点逻辑覆盖。反弹上升可重新等待自然顶点，但不刷新已用机会。每个分裂子体机会重新获得；出生下降的子体立即俯冲，可能覆盖其固定分裂速度。 |
+| 停驻爆破 | 每原弹／子体一次。有接触支撑并持续低速及低角速 stableSeconds，才开始 countdownSeconds；空中顶点、穿木期不算。重新运动清空稳定和倒计时；到时把效果入队并移除弹体。没有此被动的弹体在有支撑且稳定后清理。 |
+| 玻璃破片 | 只有原弹／分裂子弹直接碰撞造成玻璃致命伤才触发，整原发共享一次、固定两枚。沿撞前方向 ±shards.spreadAngle/2，固定速度／质量／半径／寿命；不继承主动或任何弹体被动，也不继续制造破片。倒塌、范围直接伤害压碎玻璃均不产生破片。 |
+| 死亡冲击 | 当前原发进行期间，原弹、子体、破片、倒塌物或直接伤害杀敌均可触发；每敌一次。采用队列继续连锁，无同步递归。Eliminate 明确为 Boundary，不触发。 |
+
+分裂只刷新子体的穿木／触地／石面／俯冲等每体状态；activeUsed、shardsUsed 由同一个 ShotContext 共享。破片的碰撞伤害仍使用正常冲量入口，破片杀敌仍可触发世界层的 DeathShock。
+
+撞前方向／速度在 FixedUpdate 缓存时加入本步自由飞行重力和阻尼，供原生碰撞回调使用；分裂、冲刺主动始终读取发动瞬间实际速度，不用这份碰撞缓存。当前工厂重力倍率为 1、线性阻尼为 0。未来若使用自定义物理求解、力控制器或额外速度限制，应同步核查撞前缓存。
+
+## 伤害顺序、遮挡和生命周期
+
+`DamageableBody` 新增 `ApplyDirectDamage(float, DamageSource)`、带来源的 `ApplyImpact(float,float,DamageSource)` 重载、`LastDamageSource` 和只读 `IsIndestructible`。原 API 保留；旧 ApplyImpact 仍为普通碰撞。不可破坏判定与 PartSurface 相同：显式 indestructible，或 Legacy 材质且旧 isStatic/Platform。新材质的固定件可以被破坏，不可破坏的动态件仍正常倒塌与受推。
+
+原生碰撞顺序为：固定步碰撞器对去重 → 缓存仍存活的材质／几何／入射信息 → 接触点法向冲量合计并各扣一次普通伤害 → 穿木／反弹改向 → LateUpdate 执行已排队的破坏／死亡效果。没有第二份能力碰撞伤害。静止承重门槛、死亡去重、事件重入防护及会话版本隔离保留。
+
+停驻爆破／死亡冲击分别读各自 RadialEffectSettings。每次效果先对当前世界范围内的实体构件和敌人确定最近实体表面距离、衰减和遮挡快照，再统一结算直接伤害，最后推仍存活的动态刚体。衰减为 `pow(clamp01(1-distance/radius), falloffPower)`。实体墙、静态或动态、可破坏或不可破坏均遮挡；触发时挡路的墙即使被这次效果杀死，也不能让该次效果穿到墙后。后续独立效果会重新快照。目标按实体分组，本次效果每体只直接扣一次；后续真实碰撞仍可正常受伤。
+
+队列最多 512 个待执行效果，每 LateUpdate 最多 32 个；达到队列上限会明确记录 COMBAT_EFFECT_LIMIT 错误，不递归或无限扩散。九关正常内容远低于该限制；如将来扩大敌人数，应连同内容门禁重新审查。每敌死亡一次、每体爆炸一次、整发破片一次是主要的自然终止边界。
+
+`HasUnsettledEffects` 包括未执行队列、停驻倒计时、所有尚未回收的运动／空中弹体和未稳定的场景动态构件；空中最高点仍算未结算。破片到寿命回收，其他无爆破弹体在有支撑稳定后回收；出界由 root 清理。`EndShot` 可重复调用：标记 ended，清队列与本发实体，不改构件，不产生超时／替换爆炸。Configure、换关与重试会解绑旧回调。暂停采用 scaled time，物理与能力计时一起停止。
+
+## 可读取的测试入口
+
+`CombatRuntime` 的公开入口完全实现 ICombatRuntime：Configure、BeginShot、TryUseActive、ActiveAvailable、ActiveProjectiles、PendingEffects、HasUnsettledEffects、CurrentShot、EndShot。
+
+`CombatProjectile` 提供只读 Body、Collider、Shot、ProjectileId、Kind、IsRetired、WoodPiercingUsed、GroundBounceUsed、StoneRicochetUsed、DiveUsed、IsCountingDown、IsPiercing、RestStableTime、RestCountdownRemaining、Radius、EffectiveDirection、LastIncidentVelocity、IsAirborne。没有修改额度的调试接口。`CombatRules` 提供 Rotate、InDirectionArc、RadialFalloff 的确定性计算，便于纯托管检查。
+
+```csharp
+// 仅由管理者的显式 development-player smoke 启动。
+yield return CombatRegression.Run(battle);
+// 失败抛 InvalidOperationException；成功输出 COMBAT_REGRESSION_SUCCESS。
+```
+
+回归使用真实 Unity 刚体／碰撞器与公开 Combat API，在 x≈75～90 的独立 Fixture world 中运行，不改当前关地图、目标计数或构筑。临时用 1 倍时间，结束／失败均恢复原 Time.timeScale；每个夹具清理。直接伤害与二次来源额度测试明确通过公开伤害 API 构造，不宣称它们也是自然通关路径。
+
+## v0.2 验收和当前证据
+
+| 类别 | 检查 | 状态／证据 |
+| --- | --- | --- |
+| 正常 | 两主动实际速率、质量守恒、当前方向、三枚互不碰撞、子体额度刷新 | CombatRegression 已实现；root 首次 smoke 发现缓存方向滞后一固定步，已改为瞬时实际速度；修正后待统一复跑 |
+| 正常 | 木材真实穿过／第二块阻挡、厚木不耗；地面优先；擦石与正撞；自然顶点与下降分裂 | 真实 player 夹具已实现，不能以独立编译当作物理通过 |
+| 正常 | 左向玻璃入射产生固定两片、无继承；停驻爆破直接扣血并回收 | 真实 player 夹具已实现，待 root 运行 |
+| 重复 | 连续主动、共享破片额度、多回调碰撞、同敌死亡与连锁 | 回归含一次主动、第二块玻璃、Boundary 与有界队列检查；原 v0.1 去重保留 |
+| 重置 | 运动清倒计时、重复 EndShot 无爆炸；Configure 清旧 generation、重试清旧本发 | 回归含倒计时运动重置与重复 EndShot；root smoke 负责完整入关快照／RNG／跨关 |
+| 异常 | 冲刺中心／超弧／NaN 不扣次数；UI／暂停／失焦不误射；发射 MouseUp 不触发主动 | 方向与非法值纯函数已覆盖；真实键鼠和焦点由 root UI 运行检查 |
+| 遮挡 | 一次冲击击碎墙仍不伤／推墙后目标；下次效果重新可见 | 真实快照夹具已实现；待 root 运行 |
+| 终止 | 空中低速不结算；破片寿命、稳定清理；超时取消剩余效果 | 空中与 EndShot 夹具已实现；root 控制最终超时与输赢 |
+
+本聊天实际执行：
+
+1. 当前全部 `Assets/Scripts`（包含 CombatRegression 与真实 BattleController）用 Unity **6000.3.27f1** 安装目录的 netstandard/Unity 模块、C# 9、warnings-as-errors 独立编译：通过。回归文件最初的静态常量实例访问错误已修正并重新纳入全量编译。
+2. 原始 Combat 源码加真实共享契约、真实 Unity 托管程序集在 .NET 9 运行 **150 条断言通过**：三档与角度、非法输入、伤害公式、无序 key、会话重置、扇形方向、分裂定速、角度跨 180°、径向衰减；没有模拟原生物理。
+3. 本聊天未启动 Unity 或 Windows player。root 已实际开始构建／smoke，首次分裂方向失败已定位修正；当前最新完整回归结果应由 root 的 Logs/player-smoke.log 及交付记录确认，不能把先前版本运行记录写成当前机制全部通过。
+
+临时托管检查工程仍在 `C:\Users\Gabby\AppData\Local\Temp\SiegeDemoCombatCheck\MathChecks.csproj`；执行 `dotnet run --project '<该绝对路径>' --configuration Release --no-launch-profile --no-restore`。该临时工程不进入 Git。正式可复跑的物理回归源码已在 Combat/Validation 交付。
+
+限制：当前可配置构件均为盒体，穿木不支持任意多边形；复杂多碰撞器实体仍按碰撞器对处理普通碰撞，范围效果则按实体归并。遮挡采用到最近表面点的一条实体射线，不实现绕射或部分面积暴露；这属于明确的首版近似。真实手感、九关自然通关和全部高阶组合仍由管理者统一试玩／运行验证。
+
+---
+
+# v0.1 历史交付说明
 
 日期：2026-10-24（Asia/Shanghai）。状态：代码与独立托管检查完成，Unity 集成与 Windows 实机检查由管理聊天统一执行。本模块没有启动 Unity、生成场景、改公共接口或执行 Git 写操作。
 

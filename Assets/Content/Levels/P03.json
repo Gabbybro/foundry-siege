@@ -1,0 +1,232 @@
+{
+  "version": 2,
+  "id": "P03",
+  "name": "P03 / 玻璃导爆",
+  "ammunition": 3,
+  "launcher": {
+    "x": -9.0,
+    "y": -2.4
+  },
+  "killY": -8.0,
+  "minX": -20.0,
+  "maxX": 30.0,
+  "launch": {
+    "maxSpeed": 20.0,
+    "maxDrag": 2.3,
+    "cancelRatio": 0.15,
+    "mediumRatio": 0.4,
+    "heavyRatio": 0.7,
+    "minAngle": 5.0,
+    "maxAngle": 75.0,
+    "projectileMass": 3.0,
+    "projectileRadius": 0.32
+  },
+  "settlement": {
+    "minSeconds": 2.0,
+    "stableSeconds": 1.0,
+    "timeoutSeconds": 14.0,
+    "linearThreshold": 0.16,
+    "angularThreshold": 8.0
+  },
+  "parts": [
+    {
+      "id": "ground",
+      "kind": 2,
+      "size": {
+        "x": 50.0,
+        "y": 1.0
+      },
+      "mass": 1.0,
+      "hitPoints": 1000.0,
+      "impulseThreshold": 3.0,
+      "damageMultiplier": 0.65,
+      "friction": 0.8,
+      "bounciness": 0.0,
+      "isStatic": true,
+      "material": 3,
+      "isGround": true,
+      "indestructible": true
+    },
+    {
+      "id": "enemy",
+      "kind": 1,
+      "size": {
+        "x": 0.8,
+        "y": 1.0
+      },
+      "mass": 1.8,
+      "hitPoints": 2.4,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 4,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "glass-trigger",
+      "kind": 0,
+      "size": {
+        "x": 0.18,
+        "y": 1.6
+      },
+      "mass": 0.65,
+      "hitPoints": 2.0,
+      "impulseThreshold": 0.7,
+      "damageMultiplier": 1.35,
+      "friction": 0.45,
+      "bounciness": 0.0,
+      "isStatic": true,
+      "material": 2,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "weak-post",
+      "kind": 0,
+      "size": {
+        "x": 0.4,
+        "y": 1.1
+      },
+      "mass": 0.8,
+      "hitPoints": 2.5,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 1,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "wood-roof",
+      "kind": 0,
+      "size": {
+        "x": 3.0,
+        "y": 0.28
+      },
+      "mass": 3.6,
+      "hitPoints": 8.0,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 1,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "movable-shield",
+      "kind": 0,
+      "size": {
+        "x": 0.2,
+        "y": 1.6
+      },
+      "mass": 3.0,
+      "hitPoints": 16.0,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 1,
+      "isGround": false,
+      "indestructible": false
+    }
+  ],
+  "objects": [
+    {
+      "id": "floor",
+      "partId": "ground",
+      "position": {
+        "x": 5.0,
+        "y": -4.1
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "trigger-glass",
+      "partId": "glass-trigger",
+      "position": {
+        "x": 0.3,
+        "y": -2.8
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "enemy-primer",
+      "partId": "enemy",
+      "position": {
+        "x": 1.2,
+        "y": -3.1
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "weak-left",
+      "partId": "weak-post",
+      "position": {
+        "x": 2.3,
+        "y": -3.05
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "weak-right",
+      "partId": "weak-post",
+      "position": {
+        "x": 4.7,
+        "y": -3.05
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "upper-roof",
+      "partId": "wood-roof",
+      "position": {
+        "x": 3.5,
+        "y": -2.36
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "enemy-chain-a",
+      "partId": "enemy",
+      "position": {
+        "x": 2.9,
+        "y": -1.72
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "enemy-chain-b",
+      "partId": "enemy",
+      "position": {
+        "x": 4.2,
+        "y": -1.72
+      },
+      "rotation": 0.0
+    }
+  ],
+  "templates": [
+    {
+      "id": "occlusion-variant",
+      "objects": [
+        {
+          "id": "shield",
+          "partId": "movable-shield",
+          "position": {
+            "x": 1.8,
+            "y": -2.8
+          },
+          "rotation": 0.0
+        }
+      ]
+    }
+  ],
+  "structures": []
+}

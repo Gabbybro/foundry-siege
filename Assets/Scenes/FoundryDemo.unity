@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &1638034428
+--- !u!1 &993891184
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,55 +127,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1638034430}
-  - component: {fileID: 1638034429}
-  m_Layer: 0
-  m_Name: Battle Controller
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1638034429
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1638034428}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: beaa14241765f824595249314b5b3b12, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::SiegeDemo.BattleController
-  levelSource: {fileID: 4900000, guid: 4c3214572cae7384ea1f2f7e9f141e09, type: 3}
-  battleCamera: {fileID: 1740004751}
---- !u!4 &1638034430
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1638034428}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1740004750
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1740004753}
-  - component: {fileID: 1740004751}
-  - component: {fileID: 1740004752}
+  - component: {fileID: 993891187}
+  - component: {fileID: 993891185}
+  - component: {fileID: 993891186}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -183,13 +137,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!20 &1740004751
+--- !u!20 &993891185
 Camera:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1740004750}
+  m_GameObject: {fileID: 993891184}
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
@@ -234,24 +188,81 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!81 &1740004752
+--- !u!81 &993891186
 AudioListener:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1740004750}
+  m_GameObject: {fileID: 993891184}
   m_Enabled: 1
---- !u!4 &1740004753
+--- !u!4 &993891187
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1740004750}
+  m_GameObject: {fileID: 993891184}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.6, y: 1.8, z: -10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1549102748
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1549102750}
+  - component: {fileID: 1549102749}
+  m_Layer: 0
+  m_Name: Battle Controller
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1549102749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1549102748}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: beaa14241765f824595249314b5b3b12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SiegeDemo.BattleController
+  levelSource: {fileID: 4900000, guid: 4c3214572cae7384ea1f2f7e9f141e09, type: 3}
+  battleCamera: {fileID: 993891185}
+  runSource: {fileID: 4900000, guid: 405572817fd91f34fa171d948d2d79d4, type: 3}
+  levelSources:
+  - {fileID: 4900000, guid: 59fe341410d39e04baa0699e0f17e9d7, type: 3}
+  - {fileID: 4900000, guid: 5cd11d47570244b40b8da48581ab0881, type: 3}
+  - {fileID: 4900000, guid: 9055d1db0c837354d8319f25b39beb55, type: 3}
+  - {fileID: 4900000, guid: 6c2a5743348e31d41a44e51a78093671, type: 3}
+  - {fileID: 4900000, guid: 6fa384aec2fd6c644a17597302e99790, type: 3}
+  - {fileID: 4900000, guid: f757617e1847a164eaf0fec01c9f5675, type: 3}
+  - {fileID: 4900000, guid: e004fd00046929f4c988ed00508f1bd0, type: 3}
+  - {fileID: 4900000, guid: c35098944f80b5843bcc7d7d1da2e722, type: 3}
+  - {fileID: 4900000, guid: 5de8d108dd0a77b48af0d64ae1addc36, type: 3}
+--- !u!4 &1549102750
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1549102748}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -261,5 +272,5 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1740004753}
-  - {fileID: 1638034430}
+  - {fileID: 993891187}
+  - {fileID: 1549102750}

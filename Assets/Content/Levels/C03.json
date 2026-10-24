@@ -1,0 +1,262 @@
+{
+  "version": 2,
+  "id": "C03",
+  "name": "C03 / 玻璃桥",
+  "ammunition": 3,
+  "launcher": {
+    "x": -9.0,
+    "y": -2.4
+  },
+  "killY": -8.0,
+  "minX": -20.0,
+  "maxX": 30.0,
+  "launch": {
+    "maxSpeed": 20.0,
+    "maxDrag": 2.3,
+    "cancelRatio": 0.15,
+    "mediumRatio": 0.4,
+    "heavyRatio": 0.7,
+    "minAngle": 5.0,
+    "maxAngle": 75.0,
+    "projectileMass": 3.0,
+    "projectileRadius": 0.32
+  },
+  "settlement": {
+    "minSeconds": 2.0,
+    "stableSeconds": 1.0,
+    "timeoutSeconds": 14.0,
+    "linearThreshold": 0.16,
+    "angularThreshold": 8.0
+  },
+  "parts": [
+    {
+      "id": "ground",
+      "kind": 2,
+      "size": {
+        "x": 50.0,
+        "y": 1.0
+      },
+      "mass": 1.0,
+      "hitPoints": 1000.0,
+      "impulseThreshold": 3.0,
+      "damageMultiplier": 0.65,
+      "friction": 0.8,
+      "bounciness": 0.0,
+      "isStatic": true,
+      "material": 3,
+      "isGround": true,
+      "indestructible": true
+    },
+    {
+      "id": "enemy",
+      "kind": 1,
+      "size": {
+        "x": 0.8,
+        "y": 1.0
+      },
+      "mass": 1.8,
+      "hitPoints": 5.0,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 4,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "bridge-post",
+      "kind": 0,
+      "size": {
+        "x": 0.45,
+        "y": 1.4
+      },
+      "mass": 1.5,
+      "hitPoints": 8.0,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 1,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "glass-bridge",
+      "kind": 0,
+      "size": {
+        "x": 4.4,
+        "y": 0.22
+      },
+      "mass": 2.0,
+      "hitPoints": 3.0,
+      "impulseThreshold": 0.7,
+      "damageMultiplier": 1.35,
+      "friction": 0.45,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 2,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "loose-ballast",
+      "kind": 0,
+      "size": {
+        "x": 1.0,
+        "y": 0.35
+      },
+      "mass": 2.8,
+      "hitPoints": 10.0,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 1,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "side-post",
+      "kind": 0,
+      "size": {
+        "x": 0.45,
+        "y": 0.8
+      },
+      "mass": 0.9,
+      "hitPoints": 6.0,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 1,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "side-roof",
+      "kind": 0,
+      "size": {
+        "x": 1.8,
+        "y": 0.28
+      },
+      "mass": 2.4,
+      "hitPoints": 8.0,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 1,
+      "isGround": false,
+      "indestructible": false
+    }
+  ],
+  "objects": [
+    {
+      "id": "floor",
+      "partId": "ground",
+      "position": {
+        "x": 5.0,
+        "y": -4.1
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "bridge-left",
+      "partId": "bridge-post",
+      "position": {
+        "x": 1.0,
+        "y": -2.9
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "bridge-right",
+      "partId": "bridge-post",
+      "position": {
+        "x": 5.0,
+        "y": -2.9
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "bridge",
+      "partId": "glass-bridge",
+      "position": {
+        "x": 3.0,
+        "y": -2.09
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "ballast",
+      "partId": "loose-ballast",
+      "position": {
+        "x": 1.6,
+        "y": -1.805
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "side-left",
+      "partId": "side-post",
+      "position": {
+        "x": 6.35,
+        "y": -3.2
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "side-right",
+      "partId": "side-post",
+      "position": {
+        "x": 7.65,
+        "y": -3.2
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "side-deck",
+      "partId": "side-roof",
+      "position": {
+        "x": 7.0,
+        "y": -2.66
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "enemy-bridge",
+      "partId": "enemy",
+      "position": {
+        "x": 3.0,
+        "y": -1.48
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "enemy-under",
+      "partId": "enemy",
+      "position": {
+        "x": 3.0,
+        "y": -3.1
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "enemy-side",
+      "partId": "enemy",
+      "position": {
+        "x": 7.0,
+        "y": -2.02
+      },
+      "rotation": 0.0
+    }
+  ],
+  "templates": [],
+  "structures": []
+}

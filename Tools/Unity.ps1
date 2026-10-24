@@ -8,12 +8,12 @@ $project = Split-Path -Parent $PSScriptRoot
 $logs = Join-Path $project 'Logs'
 New-Item -ItemType Directory -Path $logs -Force | Out-Null
 if ($Action -eq 'Smoke') {
-    $player = Join-Path $project 'Builds\Windows\FoundrySiege.exe'
+    $player = Join-Path $project 'Builds\Windows-v0.2\FoundrySiege.exe'
     if (!(Test-Path -LiteralPath $player)) { throw 'Run Build first.' }
     $log = Join-Path $logs 'player-smoke.log'
     $process = Start-Process -FilePath $player -ArgumentList @('-batchmode', '-nographics', '-smokeTest', '-logFile', ('"' + $log + '"')) -WindowStyle Hidden -PassThru
-    if (!$process.WaitForExit(90000)) { Stop-Process -Id $process.Id; throw "Smoke test timed out. See $log" }
-    if ($process.ExitCode -ne 0 -or !(Select-String -LiteralPath $log -Pattern 'DEMO_SMOKE_SUCCESS' -Quiet)) { throw "Smoke test failed. See $log" }
+    if (!$process.WaitForExit(240000)) { Stop-Process -Id $process.Id; throw "Smoke test timed out. See $log" }
+    if ($process.ExitCode -ne 0 -or !(Select-String -LiteralPath $log -Pattern 'ROGUELIKE_SMOKE_SUCCESS' -Quiet)) { throw "Smoke test failed. See $log" }
     Write-Output "Physics smoke test passed. Log: $log"
     exit 0
 }

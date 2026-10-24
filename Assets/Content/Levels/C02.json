@@ -1,0 +1,244 @@
+{
+  "version": 2,
+  "id": "C02",
+  "name": "C02 / 前方盾墙",
+  "ammunition": 3,
+  "launcher": {
+    "x": -9.0,
+    "y": -2.4
+  },
+  "killY": -8.0,
+  "minX": -20.0,
+  "maxX": 30.0,
+  "launch": {
+    "maxSpeed": 20.0,
+    "maxDrag": 2.3,
+    "cancelRatio": 0.15,
+    "mediumRatio": 0.4,
+    "heavyRatio": 0.7,
+    "minAngle": 5.0,
+    "maxAngle": 75.0,
+    "projectileMass": 3.0,
+    "projectileRadius": 0.32
+  },
+  "settlement": {
+    "minSeconds": 2.0,
+    "stableSeconds": 1.0,
+    "timeoutSeconds": 14.0,
+    "linearThreshold": 0.16,
+    "angularThreshold": 8.0
+  },
+  "parts": [
+    {
+      "id": "ground",
+      "kind": 2,
+      "size": {
+        "x": 50.0,
+        "y": 1.0
+      },
+      "mass": 1.0,
+      "hitPoints": 1000.0,
+      "impulseThreshold": 3.0,
+      "damageMultiplier": 0.65,
+      "friction": 0.8,
+      "bounciness": 0.0,
+      "isStatic": true,
+      "material": 3,
+      "isGround": true,
+      "indestructible": true
+    },
+    {
+      "id": "enemy",
+      "kind": 1,
+      "size": {
+        "x": 0.8,
+        "y": 1.0
+      },
+      "mass": 1.8,
+      "hitPoints": 5.5,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 4,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "front-wall",
+      "kind": 0,
+      "size": {
+        "x": 0.28,
+        "y": 2.6
+      },
+      "mass": 2.0,
+      "hitPoints": 7.0,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": true,
+      "material": 1,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "short-post",
+      "kind": 0,
+      "size": {
+        "x": 0.45,
+        "y": 1.4
+      },
+      "mass": 1.2,
+      "hitPoints": 7.0,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 1,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "long-post",
+      "kind": 0,
+      "size": {
+        "x": 0.45,
+        "y": 1.9
+      },
+      "mass": 1.4,
+      "hitPoints": 8.0,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 1,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "roof",
+      "kind": 0,
+      "size": {
+        "x": 2.6,
+        "y": 0.28
+      },
+      "mass": 3.2,
+      "hitPoints": 9.0,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 1,
+      "isGround": false,
+      "indestructible": false
+    }
+  ],
+  "objects": [
+    {
+      "id": "floor",
+      "partId": "ground",
+      "position": {
+        "x": 5.0,
+        "y": -4.1
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "shield",
+      "partId": "front-wall",
+      "position": {
+        "x": -0.8,
+        "y": -1.6
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "near-left",
+      "partId": "short-post",
+      "position": {
+        "x": 2.0,
+        "y": -2.9
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "near-right",
+      "partId": "short-post",
+      "position": {
+        "x": 4.0,
+        "y": -2.9
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "near-roof",
+      "partId": "roof",
+      "position": {
+        "x": 3.0,
+        "y": -2.06
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "rear-left",
+      "partId": "long-post",
+      "position": {
+        "x": 6.1,
+        "y": -2.65
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "rear-right",
+      "partId": "long-post",
+      "position": {
+        "x": 7.9,
+        "y": -2.65
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "rear-roof",
+      "partId": "roof",
+      "position": {
+        "x": 7.0,
+        "y": -1.56
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "enemy-near-low",
+      "partId": "enemy",
+      "position": {
+        "x": 3.0,
+        "y": -3.1
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "enemy-near-high",
+      "partId": "enemy",
+      "position": {
+        "x": 3.0,
+        "y": -1.42
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "enemy-rear",
+      "partId": "enemy",
+      "position": {
+        "x": 7.0,
+        "y": -3.1
+      },
+      "rotation": 0.0
+    }
+  ],
+  "templates": [],
+  "structures": []
+}

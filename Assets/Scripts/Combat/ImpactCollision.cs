@@ -38,7 +38,9 @@ namespace SiegeDemo
             Collider2D a = collision.collider, b = collision.otherCollider;
             if (a.isTrigger || b.isTrigger || (a.attachedRigidbody && a.attachedRigidbody == b.attachedRigidbody)) return;
             DamageableBody first = FindDamageable(a), second = FindDamageable(b);
-            if (!first && !second) return;
+            CombatProjectile projectileA = a.attachedRigidbody ? a.attachedRigidbody.GetComponent<CombatProjectile>() : null;
+            CombatProjectile projectileB = b.attachedRigidbody ? b.attachedRigidbody.GetComponent<CombatProjectile>() : null;
+            if (!first && !second && !projectileA && !projectileB) return;
 
             double step = Time.fixedTimeAsDouble;
             if (processedStep != step) { processed.Clear(); processedStep = step; }
@@ -48,10 +50,14 @@ namespace SiegeDemo
 
             double impulse = 0;
             float approach = 0;
+            ContactPoint2D representative = default;
+            float largestImpulse = -1;
             for (int i = 0; i < collision.contactCount; i++)
             {
                 ContactPoint2D point = collision.GetContact(i);
-                if (!point.enabled || !Finite(point.normalImpulse) || point.normalImpulse <= 0) continue;
+                if (!point.enabled) continue;
+                if (point.normalImpulse > largestImpulse) { representative = point; largestImpulse = point.normalImpulse; }
+                if (!Finite(point.normalImpulse) || point.normalImpulse <= 0) continue;
                 impulse += point.normalImpulse;
                 // Contact velocity includes angular motion. Use normal speed only, excluding
                 // scraping. Absolute projection is invariant under the two callback orientations;
@@ -59,13 +65,20 @@ namespace SiegeDemo
                 float speed = Mathf.Abs(Vector2.Dot(point.relativeVelocity, point.normal));
                 if (Finite(speed)) approach = Mathf.Max(approach, speed);
             }
-            if (impulse <= 0 || approach < DamageableBody.MinimumApproachSpeed) return;
-            DamageableBody.ImpactEvents++;
+            if (largestImpulse < 0) return;
+            // Capture geometry/incident motion while a glass or wood collider still exists.
+            var planA = projectileA ? projectileA.PrepareContact(b, representative.normal, representative.point) : default;
+            var planB = projectileB ? projectileB.PrepareContact(a, representative.normal, representative.point) : default;
+            DamageSource fromA = projectileA ? projectileA.Source : new DamageSource { kind = DamageKind.Collision };
+            DamageSource fromB = projectileB ? projectileB.Source : new DamageSource { kind = DamageKind.Collision };
+            if (impulse > 0 && approach >= DamageableBody.MinimumApproachSpeed) DamageableBody.ImpactEvents++;
             float total = (float)Math.Min(float.MaxValue, impulse);
             // Both bodies receive the same physical impulse with their own material thresholds.
             // This also works when only one side is damageable (the drone has no HP component).
-            if (first) first.ApplyImpact(total, approach);
-            if (second && second != first) second.ApplyImpact(total, approach);
+            if (first) first.ApplyImpact(total, approach, fromB);
+            if (second && second != first) second.ApplyImpact(total, approach, fromA);
+            if (projectileA) projectileA.ResolveContact(planA);
+            if (projectileB) projectileB.ResolveContact(planB);
         }
 
         private static DamageableBody FindDamageable(Collider2D collider)

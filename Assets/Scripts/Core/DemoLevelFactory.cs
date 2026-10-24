@@ -22,6 +22,7 @@ namespace SiegeDemo
                 var marker = go.AddComponent<LevelObjectMarker>();
                 marker.objectId = placement.id;
                 marker.partId = placement.partId;
+                go.AddComponent<PartSurface>().Initialize(part);
                 var collider = go.AddComponent<BoxCollider2D>();
                 collider.size = part.size;
                 var material = new PhysicsMaterial2D(part.id) { friction = part.friction, bounciness = part.bounciness };
@@ -35,8 +36,8 @@ namespace SiegeDemo
                     body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
                     body.angularDamping = .12f;
                     if (!gameplay) body.simulated = false;
-                    if (gameplay) go.AddComponent<DamageableBody>().Initialize(part);
                 }
+                if (gameplay) go.AddComponent<DamageableBody>().Initialize(part);
                 DemoPresentation.DecoratePart(go, part);
             }
         }

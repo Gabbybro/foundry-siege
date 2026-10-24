@@ -1,0 +1,244 @@
+{
+  "version": 2,
+  "id": "C04",
+  "name": "C04 / 石墙回廊",
+  "ammunition": 3,
+  "launcher": {
+    "x": -9.0,
+    "y": -2.4
+  },
+  "killY": -8.0,
+  "minX": -20.0,
+  "maxX": 30.0,
+  "launch": {
+    "maxSpeed": 20.0,
+    "maxDrag": 2.3,
+    "cancelRatio": 0.15,
+    "mediumRatio": 0.4,
+    "heavyRatio": 0.7,
+    "minAngle": 5.0,
+    "maxAngle": 75.0,
+    "projectileMass": 3.0,
+    "projectileRadius": 0.32
+  },
+  "settlement": {
+    "minSeconds": 2.0,
+    "stableSeconds": 1.0,
+    "timeoutSeconds": 14.0,
+    "linearThreshold": 0.16,
+    "angularThreshold": 8.0
+  },
+  "parts": [
+    {
+      "id": "ground",
+      "kind": 2,
+      "size": {
+        "x": 50.0,
+        "y": 1.0
+      },
+      "mass": 1.0,
+      "hitPoints": 1000.0,
+      "impulseThreshold": 3.0,
+      "damageMultiplier": 0.65,
+      "friction": 0.8,
+      "bounciness": 0.0,
+      "isStatic": true,
+      "material": 3,
+      "isGround": true,
+      "indestructible": true
+    },
+    {
+      "id": "enemy",
+      "kind": 1,
+      "size": {
+        "x": 0.8,
+        "y": 1.0
+      },
+      "mass": 1.8,
+      "hitPoints": 5.5,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 4,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "stone-ramp",
+      "kind": 0,
+      "size": {
+        "x": 3.3,
+        "y": 0.32
+      },
+      "mass": 5.0,
+      "hitPoints": 28.0,
+      "impulseThreshold": 3.0,
+      "damageMultiplier": 0.65,
+      "friction": 0.8,
+      "bounciness": 0.0,
+      "isStatic": true,
+      "material": 3,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "stone-cover",
+      "kind": 0,
+      "size": {
+        "x": 0.45,
+        "y": 2.4
+      },
+      "mass": 5.0,
+      "hitPoints": 80.0,
+      "impulseThreshold": 3.0,
+      "damageMultiplier": 0.65,
+      "friction": 0.8,
+      "bounciness": 0.0,
+      "isStatic": true,
+      "material": 3,
+      "isGround": false,
+      "indestructible": true
+    },
+    {
+      "id": "landing-ground",
+      "kind": 2,
+      "size": {
+        "x": 2.8,
+        "y": 0.1
+      },
+      "mass": 1.0,
+      "hitPoints": 1000.0,
+      "impulseThreshold": 3.0,
+      "damageMultiplier": 0.65,
+      "friction": 0.8,
+      "bounciness": 0.0,
+      "isStatic": true,
+      "material": 3,
+      "isGround": true,
+      "indestructible": true
+    },
+    {
+      "id": "wood-post",
+      "kind": 0,
+      "size": {
+        "x": 0.45,
+        "y": 1.7
+      },
+      "mass": 1.3,
+      "hitPoints": 7.0,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 1,
+      "isGround": false,
+      "indestructible": false
+    },
+    {
+      "id": "wood-deck",
+      "kind": 0,
+      "size": {
+        "x": 3.0,
+        "y": 0.28
+      },
+      "mass": 3.8,
+      "hitPoints": 10.0,
+      "impulseThreshold": 1.5,
+      "damageMultiplier": 1.0,
+      "friction": 0.7,
+      "bounciness": 0.0,
+      "isStatic": false,
+      "material": 1,
+      "isGround": false,
+      "indestructible": false
+    }
+  ],
+  "objects": [
+    {
+      "id": "floor",
+      "partId": "ground",
+      "position": {
+        "x": 5.0,
+        "y": -4.1
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "approach-ramp",
+      "partId": "stone-ramp",
+      "position": {
+        "x": -6.8,
+        "y": -2.7827172657021135
+      },
+      "rotation": 24.0
+    },
+    {
+      "id": "front-cover",
+      "partId": "stone-cover",
+      "position": {
+        "x": -1.0,
+        "y": -2.4
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "landing-zone",
+      "partId": "landing-ground",
+      "position": {
+        "x": 1.6,
+        "y": -3.55
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "left-post",
+      "partId": "wood-post",
+      "position": {
+        "x": 4.2,
+        "y": -2.75
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "right-post",
+      "partId": "wood-post",
+      "position": {
+        "x": 6.6,
+        "y": -2.75
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "deck",
+      "partId": "wood-deck",
+      "position": {
+        "x": 5.4,
+        "y": -1.76
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "enemy-left",
+      "partId": "enemy",
+      "position": {
+        "x": 4.8,
+        "y": -1.12
+      },
+      "rotation": 0.0
+    },
+    {
+      "id": "enemy-right",
+      "partId": "enemy",
+      "position": {
+        "x": 6.0,
+        "y": -1.12
+      },
+      "rotation": 0.0
+    }
+  ],
+  "templates": [],
+  "structures": []
+}

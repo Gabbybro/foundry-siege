@@ -20,6 +20,7 @@ namespace SiegeDemo
         private Material previewMaterial;
         private readonly Vector3[] previewPoints = new Vector3[PreviewCapacity];
         private readonly bool traceInput = Array.IndexOf(Environment.GetCommandLineArgs(), "-inputTrace") >= 0;
+        private int lastLaunchFrame = -1;
 
         public LaunchSolution CurrentAim { get; private set; }
 
@@ -76,12 +77,15 @@ namespace SiegeDemo
         {
             if (traceInput && (Input.GetMouseButtonDown(0) || Input.GetMouseButtonUp(0)))
                 Debug.Log("DEMO_INPUT: down=" + Input.GetMouseButtonDown(0) + " up=" + Input.GetMouseButtonUp(0) + " pointer=" + Input.mousePosition + " focused=" + focused + " wait=" + waitForRelease + " drag=" + dragging + " hot=" + GUIUtility.hotControl + " state=" + session?.State);
-            if (session == null || !battleCamera || settings == null || !focused || paused || Time.timeScale <= 0)
+            IRunSession run = session as IRunSession;
+            if (run != null && focused && !paused && run.Phase == RunPhase.Battle && Input.GetKeyDown(KeyCode.Escape))
             {
                 CancelAim();
+                run.SetPaused(!run.IsPaused);
                 return;
             }
-            if (session.State != BattleState.Ready || session.Ammunition <= 0)
+            if (session == null || !battleCamera || settings == null || !focused || paused || Time.timeScale <= 0 ||
+                (run != null && (run.Phase != RunPhase.Battle || run.IsPaused)))
             {
                 CancelAim();
                 return;
@@ -95,6 +99,13 @@ namespace SiegeDemo
             if (Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown(1))
             {
                 CancelAim();
+                return;
+            }
+            // Resolving still accepts a fresh active MouseDown. Do not re-arm the release
+            // barrier every frame here, or that input could never become available.
+            if (session.State != BattleState.Ready || session.Ammunition <= 0)
+            {
+                if (dragging) CancelAim();
                 return;
             }
             // Allow the MouseUp event its frame; a lost release must never leave an armed drag.
@@ -121,8 +132,10 @@ namespace SiegeDemo
             Event input = Event.current;
             if (input == null || input.button != 0 ||
                 (input.type != EventType.MouseDown && input.type != EventType.MouseDrag && input.type != EventType.MouseUp)) return;
-            if (session == null || session.State != BattleState.Ready || session.Ammunition <= 0 ||
+            IRunSession run = session as IRunSession;
+            if (session == null ||
                 !battleCamera || settings == null || !focused || paused || waitForRelease || Time.timeScale <= 0) return;
+            if (run != null && (run.Phase != RunPhase.Battle || run.IsPaused)) return;
             Vector2 pointer = new Vector2(input.mousePosition.x, Screen.height - input.mousePosition.y);
             if (traceInput) Debug.Log("DEMO_INPUT_EVENT: " + input.type + " pointer=" + pointer);
             if (PointerBlocked(pointer) || !TryPointerWorld(pointer, out Vector2 pointerWorld))
@@ -130,6 +143,17 @@ namespace SiegeDemo
                 if (dragging) CancelAim();
                 return;
             }
+            if (session.State == BattleState.Resolving)
+            {
+                if (input.type == EventType.MouseDown && Time.frameCount > lastLaunchFrame && run != null)
+                {
+                    // The release that launched the drone is never an active command.
+                    run.TryUseActive(pointerWorld);
+                    input.Use();
+                }
+                return;
+            }
+            if (session.State != BattleState.Ready || session.Ammunition <= 0) return;
             if (input.type == EventType.MouseDown)
             {
                 if (dragging || (pointerWorld - origin).sqrMagnitude > StartRadius * StartRadius) return;
@@ -142,13 +166,18 @@ namespace SiegeDemo
             {
                 LaunchSolution solution = CurrentAim;
                 CancelAim();
-                if (solution.valid) session.TryLaunch(solution);
+                // This raw event proves that the launch button was released. A fresh down
+                // next frame may use the active without requiring an extra idle input frame.
+                waitForRelease = false;
+                if (solution.valid && session.TryLaunch(solution)) lastLaunchFrame = Time.frameCount;
             }
             input.Use();
         }
 
         private bool PointerBlocked(Vector2 pointer)
         {
+            if (pointer.x < 0 || pointer.x >= Screen.width || pointer.y < 0 || pointer.y >= Screen.height || !battleCamera.pixelRect.Contains(pointer)) return true;
+            if (session is IRunSession run) return run.IsPointerBlocked(pointer) || GUIUtility.hotControl != 0;
             if (pointer.x < 0 || pointer.x >= Screen.width || pointer.y < 100 || pointer.y >= Screen.height - 110) return true;
             // Reserve the top-right restart area too, if a HUD extends below its top band.
             if (pointer.x >= Screen.width - 220 && pointer.y >= Screen.height - 160) return true;
