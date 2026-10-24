@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Foundry Siege · 地图与参数截图教程</title>
+<style>
+:root{color-scheme:light;--ink:#203139;--muted:#5d6e76;--line:#d9e2e4;--accent:#146b68;--paper:#fff;--bg:#edf2f2}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.85 "Microsoft YaHei","Segoe UI",sans-serif}a{color:var(--accent);text-underline-offset:4px}header{background:#173d43;color:#fff;padding:54px max(5vw,24px) 44px}header .inner{max-width:1200px;margin:auto}.eyebrow{font-size:13px;letter-spacing:2px;color:#a9d9d0}h1{font-size:clamp(28px,4vw,45px);line-height:1.35;margin:14px 0}header p{max-width:850px;color:#d5e5e7;margin:8px 0}.meta{font-size:13px;color:#b8d0d3}.layout{max-width:1480px;margin:auto;display:grid;grid-template-columns:220px minmax(0,1fr);gap:32px;padding:32px 28px}nav{position:sticky;top:24px;align-self:start;font-size:14px}nav strong{display:block;margin-bottom:10px}nav a{display:block;text-decoration:none;padding:6px 10px;border-left:2px solid transparent}nav a:hover{background:#dfeae8;border-color:var(--accent)}main{min-width:0}section{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:28px 32px;margin-bottom:26px;box-shadow:0 6px 20px #20313904}h2{font-size:25px;line-height:1.5;margin:0 0 18px}h3{font-size:19px;margin:28px 0 10px}p{margin:12px 0}li{margin:7px 0}.step{display:inline-grid;place-items:center;background:var(--accent);color:#fff;border-radius:8px;width:36px;height:36px;font-size:18px;margin-right:12px}.note,.exercise{border-left:4px solid #d39b3f;background:#fff8e9;padding:14px 18px;margin:18px 0}.exercise{background:#edf7f4;border-color:var(--accent)}.small,figcaption{font-size:14px;color:var(--muted)}figure{margin:22px 0}figure a{display:block}figure img{display:block;width:100%;height:auto;border-radius:8px;border:1px solid #cbd6d8;cursor:zoom-in}figcaption{margin-top:9px;line-height:1.7}code{font:0.91em/1.5 Consolas,"Microsoft YaHei",monospace;background:#edf2f3;padding:2px 5px;border-radius:4px;overflow-wrap:anywhere}pre{overflow:auto;padding:18px;background:#172e36;color:#e7f1f2;border-radius:8px;font:14px/1.7 Consolas,monospace}pre code{background:none;padding:0;color:inherit}.table-wrap{overflow:auto;margin:16px 0}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:11px 13px;vertical-align:top;text-align:left}th{background:#eaf1f1;color:#294c52;white-space:nowrap}td:first-child{min-width:150px}tbody tr:nth-child(even){background:#f8fafb}.flow{display:flex;flex-wrap:wrap;gap:10px;list-style:none;padding:0;counter-reset:flow}.flow li{padding:10px 16px;background:#eaf3f0;border-radius:8px;font-weight:bold}.flow li:before{counter-increment:flow;content:counter(flow) " · ";color:var(--accent)}.badge{display:inline-block;border-radius:4px;padding:2px 8px;font-size:12px;background:#e1efeb;color:#225a50}footer{padding:10px 4px 40px;font-size:13px;color:var(--muted)}dialog{border:0;background:#10222a;padding:12px;width:min(98vw,1600px);max-width:98vw;border-radius:10px;color:#fff}dialog::backdrop{background:#10222ae8}dialog img{display:block;max-width:100%;max-height:85vh;margin:auto;object-fit:contain}dialog button{display:block;margin:0 0 10px auto;padding:7px 14px;background:#fff;border:0;border-radius:5px;cursor:pointer}dialog p{margin:10px;font-size:14px}
+@media(max-width:1000px){.layout{grid-template-columns:1fr;padding:18px;gap:18px}nav{position:static;display:flex;flex-wrap:wrap;gap:3px}nav strong{width:100%}nav a{padding:4px 8px}section{padding:22px 18px}}
+@media print{body{background:#fff;font-size:11pt}header{padding:20px;background:#fff;color:#203139}header p,.eyebrow,.meta{color:#5d6e76}.layout{display:block;padding:0}nav,dialog{display:none}section{border:0;padding:16px 0;box-shadow:none;break-before:auto}figure,table,.note,.exercise{break-inside:avoid}figure img{max-height:17cm;object-fit:contain}a{color:inherit}h2,h3{break-after:avoid}}
+</style>
+</head>
+<body>
+<header><div class="inner"><div class="eyebrow">FOUNDRY SIEGE / AUTHORING GUIDE</div><h1>地图与参数截图教程</h1><p>从打开关卡，到摆放零件、切换材质、调整发射与能力，再到保存、试射和校验。跟着真实工程截图完成第一轮配置。</p><div class="meta">适用：Demo v0.2 · Unity 6000.3.27f1 · 截图与源码核对：2026-10-24 · 17 张实际界面截图</div></div></header>
+<div class="layout">
+<nav aria-label="教程目录"><strong>阅读顺序</strong><a href="#start">01　找到配置入口</a><a href="#load">02　载入一张地图</a><a href="#place">03　摆放与复制零件</a><a href="#material">04　更换材质</a><a href="#save">05　保存与基础试射</a><a href="#level">06　发射和结算参数</a><a href="#parts">07　尺寸、耐久与物理</a><a href="#objects">08　坐标与结构模板</a><a href="#abilities">09　两主动、七被动</a><a href="#practice">10　练习默认构筑</a><a href="#validate">11　校验与构建</a><a href="#first">12　第一次动手练习</a><a href="#troubleshoot">遇到问题时</a></nav>
+<main>
+<section id="start"><h2><span class="step">01</span>先分清两类配置</h2><p>地图位置、物体尺寸、耐久、弹药和发射参数放在<strong>单关 JSON</strong>；主动、被动和练习默认构筑放在<strong>整轮 JSON</strong>。文件都在工程目录 <code>D:\愤怒的小鸟</code> 中。</p>
+<div class="table-wrap"><table><thead><tr><th>你要改什么</th><th>文件位置（相对工程根目录）</th></tr></thead><tbody>
+<tr><td>五个正式关</td><td><code>Assets/Content/Levels/C01.json</code> ～ <code>C05.json</code></td></tr>
+<tr><td>四个练习关的地图</td><td><code>Assets/Content/Levels/P01.json</code> ～ <code>P04.json</code></td></tr>
+<tr><td>能力数值、练习构筑</td><td><code>Assets/Content/RunConfiguration.json</code></td></tr>
+<tr><td>Unity 入口场景</td><td><code>Assets/Scenes/FoundryDemo.unity</code></td></tr>
+</tbody></table></div>
+<p>使用 Unity 6000.3.27f1 打开工程，在底部 Project 中进入 <code>Assets → Scenes</code>，双击 <code>FoundryDemo</code>。此时 Scene 里没有塔是正常的：关卡从 JSON 创建，下一步载入即可看到。</p>
+<figure><a href="images/01-open-scene.jpg"><img src="images/01-open-scene.jpg" alt="Unity 中打开 FoundryDemo，底部是 Scenes 目录，左侧只有相机和战斗控制器"></a><figcaption>图 1｜打开 FoundryDemo。左侧 Hierarchy 看场景对象，中间 Scene 摆地图，右侧 Inspector 改选中对象。</figcaption></figure>
+<div class="note"><strong>先停下 Play 再编辑。</strong>顶部播放按钮处于停止状态时才能载入、保存地图。<code>InstallationCheck</code> 是安装检查场景；<code>DemoLevel.json</code> 是旧版样例，当前九关使用 <code>Levels</code> 目录。</div>
+</section>
+<section id="load"><h2><span class="step">02</span>把 C01 木塔载入编辑器</h2>
+<ol><li>顶部选择 <code>Siege Demo → Level → Load JSON...</code>。</li><li>进入工程的 <code>Assets/Content/Levels</code>，选中 <code>C01.json</code>，点击打开。</li><li>左侧出现 <code>Level Preview</code>；展开后选择木柱或敌人。物体不在视野里时，将鼠标移到 Scene 并按 <kbd>F</kbd> 聚焦选中物体，再用滚轮拉远。</li></ol>
+<figure><a href="images/02-level-menu.jpg"><img loading="lazy" src="images/02-level-menu.jpg" alt="Siege Demo 菜单下的 Level 和 Load JSON"></a><figcaption>图 2｜选择 Load JSON...。Load Demo JSON 会载入旧版 DemoLevel.json。</figcaption></figure>
+<figure><a href="images/03-choose-c01.jpg"><img loading="lazy" src="images/03-choose-c01.jpg" alt="文件打开窗口中选择 Levels 目录的 C01.json"></a><figcaption>图 3｜C 开头是正式关，P 开头是练习关。这里以 C01 为例。</figcaption></figure>
+</section>
+<section id="place"><h2><span class="step">03</span>移动、旋转、复制地图物件</h2>
+<figure><a href="images/04-map-inspector.jpg"><img loading="lazy" src="images/04-map-inspector.jpg" alt="C01 木塔和选中前柱的 Inspector，包含 Transform 与 Level Object Marker"></a><figcaption>图 4｜选中 front-post。右侧 Position 为 (1, −2.75, 0)，Marker 中 Object Id 为 front-post，Part Id 为 wood-post。</figcaption></figure>
+<ol><li>在左侧选中 <code>front-post</code>。右侧 <strong>Transform → Position</strong> 的 X 控制左右、Y 控制上下；这些坐标是物体中心。可直接输入数字，也可在 Scene 使用移动工具拖拽。</li><li>角度改 <strong>Rotation → Z</strong>，单位为度。地图在 XY 平面，Position Z 保持 0，Rotation X/Y 保持 0。</li><li>尺寸到 JSON 的 <code>parts[].size</code> 修改；Transform 的 Scale 保持 <code>(1,1,1)</code>，这样保存后的碰撞尺寸才与数据一致。</li><li>复制物体可选中后按 <kbd>Ctrl+D</kbd>，再修改 <strong>Level Object Marker → Object Id</strong> 为唯一名称，例如 <code>extra-post</code>，随后移动到新位置。</li></ol>
+<div class="note"><strong>Object Id 与 Part Id 作用不同。</strong>Object Id 是这一件物体的唯一身份；Part Id 是它使用的零件定义。两根柱子可以共用 <code>wood-post</code>，但不能有相同的 Object Id。只改 Hierarchy 中显示的名称不能解决重复 ID。</div>
+<p>删除不需要的预览物体后可保存；关卡至少保留一个目标。摆塔时让支撑面接触，避免把两块实体深深插在一起。校验会检查旋转后的矩形穿插，但开场是否稳定仍要实际试射观察。</p>
+</section>
+<section id="material"><h2><span class="step">04</span>把选中木柱改成玻璃</h2>
+<ol><li>停在 Edit 模式，选中带有 Level Object Marker 的前柱。</li><li>选择 <code>Siege Demo → Level → Material → Glass defaults</code>。</li><li>检查 Scene 的颜色变化和 Marker 的 Part Id。工具会给这一件物体建立独立零件定义；后柱仍使用原木柱参数。</li><li>满意后按下一节的方法保存；想放弃草稿就选择 <code>Reset preview to loaded snapshot</code>。</li></ol>
+<figure><a href="images/06-material-menu.jpg"><img loading="lazy" src="images/06-material-menu.jpg" alt="Material 子菜单提供 Glass、Metal、Stone、Wood defaults"></a><figcaption>图 5｜四种材质预设。切换会应用对应质量、耐久、碰撞伤害、摩擦和弹性初值。</figcaption></figure>
+<figure><a href="images/07-glass-preview.jpg"><img loading="lazy" src="images/07-glass-preview.jpg" alt="前柱已变为玻璃，Inspector 中 Part Id 为 wood-post-glass"></a><figcaption>图 6｜真实预览：只有前柱变成玻璃，Part Id 为 wood-post-glass。本次教学没有把这个改动写入正式 C01。</figcaption></figure>
+<div class="table-wrap"><table><thead><tr><th>预设</th><th>质量</th><th>耐久</th><th>冲量门槛</th><th>伤害系数</th><th>摩擦 / 弹性</th></tr></thead><tbody>
+<tr><td>Wood 木</td><td>1.4</td><td>8</td><td>1.5</td><td>1</td><td>0.70 / 0</td></tr><tr><td>Glass 玻璃</td><td>0.65</td><td>3</td><td>0.7</td><td>1.35</td><td>0.45 / 0</td></tr><tr><td>Stone 石</td><td>5</td><td>28</td><td>3</td><td>0.65</td><td>0.80 / 0</td></tr><tr><td>Metal 金属</td><td>3</td><td>16</td><td>3</td><td>0.75</td><td>0.65 / 0</td></tr>
+</tbody></table></div>
+<p>这些是每件物体的预设，不按体积自动换算。材质菜单保留尺寸、位置、对象角色及固定／地面／不可破坏标记。直接在 JSON 中只改 <code>material</code> 数字<strong>不会</strong>自动替换其余物理数值。</p>
+</section>
+<section id="save"><h2><span class="step">05</span>保存数据，再做基础试射</h2>
+<ol class="flow"><li>编辑预览</li><li>Save preview JSON</li><li>Reset and test saved JSON</li><li>停止 Play</li><li>继续调参</li></ol>
+<figure><a href="images/05-save-test-menu.jpg"><img loading="lazy" src="images/05-save-test-menu.jpg" alt="Level 菜单包含保存 JSON、另存、重置快照和试射入口"></a><figcaption>图 7｜保存用 Save preview JSON；试射用 Reset and test saved JSON。试射会重新读取磁盘文件。</figcaption></figure>
+<div class="table-wrap"><table><thead><tr><th>菜单</th><th>什么时候用</th></tr></thead><tbody>
+<tr><td>Save preview JSON</td><td>把当前预览位置、Z 角度、增删结果和材质草稿写回载入的 JSON。</td></tr>
+<tr><td>Save preview JSON as...</td><td>另存实验版本。建议先创建 <code>Assets/Content/Drafts</code>，保存为 <code>C01-test.json</code>。</td></tr>
+<tr><td>Reset preview to loaded snapshot</td><td>放弃未保存的预览改动，回到载入或上次保存的状态。不会读取外部刚改过的新文件。</td></tr>
+<tr><td>Reset and test saved JSON</td><td>重读已保存的单关并进入基础物理试射。文件必须在 Assets 下，当前场景须有绑定好相机的 BattleController。</td></tr>
+</tbody></table></div>
+<div class="note"><strong>Ctrl+S 保存场景，不等于保存地图 JSON。</strong>先点 Save preview JSON 再试射。Play 中倒塌后的状态不会被保存成关卡初始布局；退出 Play 后试射引用自动恢复。</div>
+<figure><a href="images/08-basic-trial.jpg"><img loading="lazy" src="images/08-basic-trial.jpg" alt="C01 基础物理试射，HUD 显示三发、两个目标和未选择主动"></a><figcaption>图 8｜基础试射中看弹道、倒塌和目标耐久。此入口没有主动／被动，HUD 的“未选择主动”是预期状态；画面的单关进度文字不代表正在测试完整五关流程。</figcaption></figure>
+<p>调主动／被动时：停止试射，再点 Unity 顶部正常 Play，进入主菜单，选对应练习。正式路线则从“开始正式作战”进入。</p>
+<figure><a href="images/09-main-menu.jpg"><img loading="lazy" src="images/09-main-menu.jpg" alt="正常 Play 的主菜单，包括正式作战和四个练习入口"></a><figcaption>图 9｜正常游戏入口。四个练习适合重复比较能力参数。</figcaption></figure>
+<p class="small">实验副本仍保留原内部 id，例如 C01。放在 Drafts 可以单关试射，但不会自动加入正式路线；当前路线与九关 ID 有固定校验，不要直接在 Levels 里复制多个同 ID 文件。</p>
+</section>
+<section id="level"><h2><span class="step">06</span>修改发射、弹体和结算参数</h2>
+<p>用 Cursor、VS Code 或其他文本编辑器打开 <code>Assets/Content/Levels/C01.json</code>。改数字后保存，回到 Unity 等待导入，再用 Load JSON... 重载预览。</p>
+<figure><a href="images/10-level-parameters.jpg"><img loading="lazy" src="images/10-level-parameters.jpg" alt="C01 JSON 顶部的 launcher、launch 和 settlement 参数"></a><figcaption>图 10｜文件顶部决定这一关从哪里发射、拉多远、飞多快和何时结束一发。</figcaption></figure>
+<div class="table-wrap"><table><thead><tr><th>字段</th><th>C01 当前值</th><th>含义与改动影响</th></tr></thead><tbody>
+<tr><td>version / id / name</td><td>2 / C01 / C01 木塔试射</td><td>单关格式版本、唯一关卡 ID、显示名称。修改布局时保留 version 和 id。</td></tr>
+<tr><td>ammunition</td><td>3</td><td>每关弹药数。本版正式关和练习关都按三发规则校验；仅改成 4 会使整轮校验失败。</td></tr>
+<tr><td>launcher.x / y</td><td>−9 / −2.4</td><td>发射点中心。移动后检查初始弹体没有与地面或墙重叠。</td></tr>
+<tr><td>killY / minX / maxX</td><td>−8 / −20 / 30</td><td>世界清理边界与合法初始位置范围。扩大范围不会自动扩大摄像机视野。</td></tr>
+<tr><td>launch.maxSpeed</td><td>20</td><td>重档初速。轻、中、重分别是它的 1/3、2/3、1 倍，当前约 6.67、13.33、20。</td></tr>
+<tr><td>launch.maxDrag</td><td>2.3</td><td>最大拉距，按世界距离计算；越大，拉到相同档位需要拖得越远。</td></tr>
+<tr><td>cancelRatio / mediumRatio / heavyRatio</td><td>0.15 / 0.4 / 0.7</td><td>拉距占 maxDrag 的比例。小于 0.15 取消；0.15～&lt;0.4 轻档；0.4～&lt;0.7 中档；≥0.7 重档。需满足 0≤取消&lt;中&lt;重&lt;1。</td></tr>
+<tr><td>minAngle / maxAngle</td><td>5 / 75</td><td>允许的发射角度（度），满足 0≤最小≤最大≤89.9。</td></tr>
+<tr><td>projectileMass</td><td>3</td><td>原始弹体质量，影响碰撞与推倒效果；它不是直接伤害倍数。</td></tr>
+<tr><td>projectileRadius</td><td>0.32</td><td>原始弹体半径。增大后更容易接触物体，也更难穿过狭缝。</td></tr>
+<tr><td>settlement.minSeconds</td><td>2</td><td>一发结算的最短等待时间，避免刚发射就结算。</td></tr>
+<tr><td>settlement.stableSeconds</td><td>1</td><td>满足稳定条件后继续保持多久才结束该发。</td></tr>
+<tr><td>settlement.timeoutSeconds</td><td>14</td><td>最长结算时间；到时清理剩余弹体／效果，再判定。末发也会等结算，不会一松手就失败。</td></tr>
+<tr><td>linearThreshold / angularThreshold</td><td>0.16 / 8</td><td>判断结构稳定的线速度／角速度阈值。角速度按度每秒；阈值越低越严格，通常等得更久。</td></tr>
+</tbody></table></div>
+<p>质量、半径、最大速度与最大拉距都必须大于 0；稳定时长与超时也须为正，超时至少 1 秒且不能小于最短等待或稳定时长。每次只改一组值，更容易判断变化来自哪里。</p>
+</section>
+<section id="parts"><h2><span class="step">07</span>修改尺寸、耐久和碰撞属性</h2>
+<p><code>parts</code> 是零件库，<code>objects</code> 是摆放清单。C01 的两根柱子都引用 <code>wood-post</code>，因此修改该定义会同时影响两根柱子。</p>
+<figure><a href="images/11-part-parameters.jpg"><img loading="lazy" src="images/11-part-parameters.jpg" alt="木柱和横梁的零件库，展示尺寸、质量、耐久及材质标记"></a><figcaption>图 11｜wood-post 的完整定义。要让柱子变宽，改 size.x；要让它更容易碎，先尝试降低 hitPoints。</figcaption></figure>
+<div class="table-wrap"><table><thead><tr><th>字段</th><th>木柱当前值</th><th>如何理解</th></tr></thead><tbody>
+<tr><td>id</td><td>wood-post</td><td>零件库唯一名称，供 objects[].partId 引用。</td></tr>
+<tr><td>kind</td><td>0</td><td>0 普通梁材；1 敌方目标；2 平台。目标数量来自实际放置的 kind=1 对象。</td></tr>
+<tr><td>size.x / size.y</td><td>0.45 / 1.7</td><td>完整宽度／高度，均须为正。尺寸变化后同步调整支撑位置，避免穿插或悬空。</td></tr>
+<tr><td>mass</td><td>1.3</td><td>质量（正值）。增大会改变惯性、碰撞冲量和整座塔的重心关系。</td></tr>
+<tr><td>hitPoints</td><td>8</td><td>初始耐久（正值）。可尝试 8→6，比较在相同射击下是否更容易断。</td></tr>
+<tr><td>impulseThreshold</td><td>1.5</td><td>碰撞冲量免伤门槛（非负）。越高，小碰撞越不容易伤到它。</td></tr>
+<tr><td>damageMultiplier</td><td>1</td><td>超过门槛部分的伤害系数（正值）。它控制这件零件受到的碰撞伤害。</td></tr>
+<tr><td>friction</td><td>0.7</td><td>摩擦系数，范围 0～1。调高通常更不易滑，但不能保证不倒。</td></tr>
+<tr><td>bounciness</td><td>0</td><td>物理弹性，范围 0～1。与“触地反弹”被动是两套作用。</td></tr>
+<tr><td>isStatic</td><td>false</td><td>true 为固定物体，不受动态重力移动；不等于不可破坏。</td></tr>
+<tr><td>material</td><td>1</td><td>1 木、2 玻璃、3 石、4 金属。影响外观及材质相关能力判断。</td></tr>
+<tr><td>isGround</td><td>false</td><td>是否作为地面供相应规则识别。地面必须固定；仅取名 floor 不够。</td></tr>
+<tr><td>indestructible</td><td>false</td><td>true 为不可破坏。敌方目标必须动态、可破坏、不是地面；Platform 必须固定。</td></tr>
+</tbody></table></div>
+<p>有效碰撞中的核心伤害关系是 <code>(冲量 − impulseThreshold) × damageMultiplier</code>，同时受接近速度门槛、有效碰撞判断及当前剩余耐久上限约束。不能仅用质量推算最终伤害。</p>
+<div class="exercise"><strong>只想削弱一根柱子：</strong>复制整个 wood-post 定义，给新定义独立 id（例如 <code>weak-post</code>），将 hitPoints 改为 6；再只把前柱的 partId 改成 weak-post。材质菜单已经自动采用这种独立定义方式。</div>
+</section>
+<section id="objects"><h2><span class="step">08</span>在 JSON 中精确配置地图坐标</h2>
+<figure><a href="images/12-object-placement.jpg"><img loading="lazy" src="images/12-object-placement.jpg" alt="objects 数组中的 floor、front-post、rear-post 和 roof 放置参数"></a><figcaption>图 12｜front-post 和 rear-post 共享 wood-post，位置分别是 X=1 和 X=3。</figcaption></figure>
+<pre><code>{
+  "id": "front-post",
+  "partId": "wood-post",
+  "position": { "x": 1.0, "y": -2.75 },
+  "rotation": 0.0
+}</code></pre>
+<p>这段是 <code>objects</code> 中的一项。id 标识这一根柱子；partId 决定它的尺寸与属性；position 决定中心位置；rotation 决定 Z 轴角度。例如 <code>x: 1.0 → 1.2</code> 会右移 0.2 个世界单位。这里是讲解示例，正式配置没有被改动。</p>
+<div class="table-wrap"><table><thead><tr><th>C01 物件</th><th>partId</th><th>中心 (X, Y)</th></tr></thead><tbody><tr><td>floor 地面</td><td>ground</td><td>(5, −4.1)</td></tr><tr><td>front-post 前柱</td><td>wood-post</td><td>(1, −2.75)</td></tr><tr><td>rear-post 后柱</td><td>wood-post</td><td>(3, −2.75)</td></tr><tr><td>roof 横梁</td><td>wood-roof</td><td>(2, −1.76)</td></tr><tr><td>enemy-low 下层目标</td><td>enemy</td><td>(2, −3.1)</td></tr><tr><td>enemy-high 上层目标</td><td>enemy</td><td>(2, −1.12)</td></tr></tbody></table></div>
+<h3>需要重复一整组结构时</h3><p><code>templates</code> 存一组局部对象，<code>structures</code> 放置模板实例。世界位置 = 实例位置 + 旋转后的局部位置；世界角度 = 实例角度 + 局部角度。展开对象 ID 形如 <code>实例ID/局部ID</code>，也不能与其他对象重名。</p>
+<p>初学阶段先用 objects 即可。通过 Unity 预览保存时，会把所有结构展开到 objects，并清空 structures；模板定义保留，但保存后的物体不再与模板实例关联。</p>
+</section>
+<section id="abilities"><h2><span class="step">09</span>调整两主动、七被动</h2>
+<p>打开 <code>Assets/Content/RunConfiguration.json</code>，找到 <code>abilities</code>。这些是整轮共用参数，会影响正式作战和练习。保存后停止旧的 Play，再开始新测试。</p>
+<figure><a href="images/13-ability-parameters.jpg"><img loading="lazy" src="images/13-ability-parameters.jpg" alt="RunConfiguration 的 abilities 全部数值，包括 split、dash 和七种被动设置"></a><figcaption>图 13｜共用能力参数。以下表格逐项解释当前值；比例 0.85 表示保留 85%。</figcaption></figure>
+<div class="table-wrap"><table><thead><tr><th>能力 / 分组</th><th>字段与当前值</th><th>作用与范围</th></tr></thead><tbody>
+<tr><td>空中分裂<br><code>split</code></td><td><code>speed=18</code><br><code>spreadAngle=18</code><br><code>radiusScale=0.58</code></td><td>子弹固定初速，须为正；中心线到单侧的夹角，范围 0～89.9°，当前总张角 36°；子弹半径相对母体的比例，须大于 0 且小于 1。三枚子弹、各分得母体 1/3 质量由规则固定。</td></tr>
+<tr><td>空中冲刺<br><code>dash</code></td><td><code>speedIncrement=10</code><br><code>centerAngle=0</code><br><code>angleWidth=360</code></td><td>冲刺速度 = 触发瞬间速率 + 正增量；允许方向的中心角，世界向右为 0°；允许角宽，大于 0 且不超过 360°。当前全方向可用；中心 0、宽 180 表示右半平面。</td></tr>
+<tr><td>穿木一次<br><code>piercing</code></td><td><code>minimumSpeed=6</code><br><code>maximumThickness=1.2</code><br><code>speedRetention=0.82</code></td><td>最低穿木速度（非负）；可穿过的最大有效厚度（正值，斜穿会改变有效厚度）；穿后保速比例 0～1。每个可触发弹体按一次穿木规则处理。</td></tr>
+<tr><td>触地反弹<br><code>groundBounce</code></td><td><code>verticalMultiplier=1</code><br><code>minimumUpSpeed=9</code><br><code>horizontalRetention=0.85</code></td><td>竖直反弹系数（非负）；最小向上速度（正值）；水平保速 0～1。依赖 isGround 地面识别。</td></tr>
+<tr><td>石面跳弹<br><code>stoneRicochet</code></td><td><code>maximumGlancingAngle=30</code><br><code>speedRetention=0.85</code><br><code>minimumUpSpeed=9</code></td><td>相对表面切线的最大擦撞角，0～89.9°；保速 0～1；最小向上速度为正。成功跳弹才消耗这次效果。</td></tr>
+<tr><td>顶点俯冲<br><code>apexDive</code></td><td><code>downSpeed=18</code><br><code>horizontalRetention=0.55</code></td><td>触发时赋予的向下速度（正值）与水平保留比例（0～1）。在符合规则的自然顶点触发；不能通过重复赋值持续加速。</td></tr>
+<tr><td>停驻爆破：停驻判定<br><code>rest</code></td><td><code>stableSeconds=0.6</code><br><code>countdownSeconds=1</code><br><code>maximumSpeed=0.3</code><br><code>maximumAngularSpeed=20</code></td><td>稳定保持时长、随后引爆倒计时（秒，均为正）；允许的最大线速度与角速度（非负）。需有支撑，重新运动会打断。这里的稳定参数不同于单关 settlement。</td></tr>
+<tr><td>停驻爆破：爆炸强度<br><code>explosion</code></td><td><code>radius=4</code><br><code>damage=12</code><br><code>impulse=9</code><br><code>falloffPower=1</code></td><td>作用半径、直接伤害、推力、距离衰减幂。半径和衰减幂为正；伤害和推力非负，分别调整。</td></tr>
+<tr><td>连锁冲击（死亡冲击）<br><code>deathShock</code></td><td><code>radius=3.4</code><br><code>damage=9</code><br><code>impulse=8</code><br><code>falloffPower=1</code></td><td>字段含义与 explosion 相同。直接伤害和推力均要考虑遮挡；看到后续倒塌不等于直接伤害穿过了掩体。</td></tr>
+<tr><td>破片扩散（玻璃破片）<br><code>shards</code></td><td><code>speed=18</code><br><code>spreadAngle=30</code><br><code>mass=0.25</code><br><code>radius=0.1</code><br><code>lifetime=6</code></td><td>破片速度、两枚破片的总夹角、每枚质量、半径和寿命（秒）。角度 0～180°，其余均为正。这里 30° 表示两侧各偏 15°，与 split 的单侧夹角定义不同。</td></tr>
+</tbody></table></div>
+<p>爆炸衰减采用 <code>pow(clamp01(1 − 距离/半径), falloffPower)</code>。当前幂为 1，即线性衰减；幂增大后，远处效果衰减更快。物理速度按世界单位每秒，角度按度，角速度按度每秒理解。</p>
+<div class="note"><strong>配置能调已有行为的数值。</strong>分裂三枚、玻璃破片两枚、每次原始发射一次主动、升级三选一及排除已拥有项等属于代码规则。不能靠添加一个 JSON 字段就创造新能力或改变这些规则。</div>
+</section>
+<section id="practice"><h2><span class="step">10</span>配置练习的默认主动和被动</h2>
+<figure><a href="images/17-practice-json.jpg"><img loading="lazy" src="images/17-practice-json.jpg" alt="RunConfiguration 文件中四个 practices 的名称、说明和 build 配置"></a><figcaption>图 14｜每个 practice 包含 levelId、name、instructions 和 build。</figcaption></figure>
+<div class="table-wrap"><table><thead><tr><th>字段</th><th>改哪里</th></tr></thead><tbody><tr><td>levelId</td><td>保持 P01～P04 的既有对应关系；关联到相应地图 id。</td></tr><tr><td>name / instructions</td><td>练习名称与操作说明，可编辑中文文本，必须非空。</td></tr><tr><td>build.active</td><td>1 = 空中分裂；2 = 空中冲刺。练习默认主动不接受 0。</td></tr><tr><td>build.passives</td><td>用下表中的整数列表配置，例如 <code>[0,2]</code> 是穿木＋停驻爆破。不能重复或使用未知 ID。</td></tr></tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th>被动 ID</th><th>能力</th><th>参数分组</th></tr></thead><tbody><tr><td>0</td><td>穿木一次</td><td>piercing</td></tr><tr><td>1</td><td>触地反弹</td><td>groundBounce</td></tr><tr><td>2</td><td>停驻爆破</td><td>rest + explosion</td></tr><tr><td>3</td><td>连锁冲击 / 死亡冲击</td><td>deathShock</td></tr><tr><td>4</td><td>破片扩散 / 玻璃破片</td><td>shards</td></tr><tr><td>5</td><td>石面跳弹</td><td>stoneRicochet</td></tr><tr><td>6</td><td>顶点俯冲</td><td>apexDive</td></tr></tbody></table></div>
+<p>当前默认：P01 = 主动 1＋<code>[0]</code>；P02 = 主动 2＋<code>[1]</code>；P03 = 主动 2＋<code>[4,3]</code>；P04 = 主动 2＋<code>[5,6]</code>。主菜单进入练习后，还可以在界面临时勾选构筑。</p>
+<figure><a href="images/16-practice-loadout.jpg"><img loading="lazy" src="images/16-practice-loadout.jpg" alt="P01 练习构筑界面，可以选两种主动和七种被动"></a><figcaption>图 15｜选择能力后点击进入练习。界面临时选配用于试玩；要改变文件中的默认构筑，编辑上面的 build。</figcaption></figure>
+<p>测试主动时，先按住无人机反向拖拽并松手发射；飞行中再用一次新的左键点击触发。分裂沿当时飞行方向展开，冲刺朝点击点改向。若只想比较被动，尽量重复同一角度、同一档位。</p>
+<div class="note">本版 <code>campaignLevels</code> 固定为 C01→C02→C03→C04→C05，练习固定为 P01～P04。新增 C06 或任意重排正式路线还涉及校验、关卡绑定和流程代码，当前不能只改列表就完成。</div>
+</section>
+<section id="validate"><h2><span class="step">11</span>校验通过，再生成新版游戏</h2>
+<p>先保存 JSON。可以用 <code>Siege Demo → Level → Validate JSON and preview</code> 检查当前文本或预览；用 <code>Siege Demo → Run → Validate configuration and nine levels</code> 检查整轮与九关。</p>
+<p>完整检查入口是 <code>Siege Demo → Build → Validate</code>。它会重新打开正式场景，因此执行前要把预览改动保存进 JSON。菜单中的 <code>Generate playable scene</code> 会重新生成并绑定正式场景，日常调数字不需要反复执行。</p>
+<figure><a href="images/14-validate-build.jpg"><img loading="lazy" src="images/14-validate-build.jpg" alt="Build 子菜单包含 Generate playable scene、Validate 和 Windows"></a><figcaption>图 16｜Validate 做完整检查；Windows 生成 Windows 玩家。</figcaption></figure>
+<figure><a href="images/15-validation-success.jpg"><img loading="lazy" src="images/15-validation-success.jpg" alt="Unity Console 显示 PROJECT_VALIDATION_SUCCESS 和配置校验成功"></a><figcaption>图 17｜本次实际执行的校验结果包含 PROJECT_VALIDATION_SUCCESS 与 ROGUELIKE_CONFIG_SUCCESS。</figcaption></figure>
+<p>配置已编入游戏数据。修改工程 JSON 不会改变已经构建好的 exe；包内 Reference JSON 也只是参考。要交付新数值，先完成 Editor 试玩，再重新构建并运行 Smoke。</p>
+<p><strong>批处理前关闭本项目 Unity Editor；构建前关闭正在运行的同版本游戏。</strong>在工程目录的 PowerShell 中按顺序运行：</p>
+<pre><code>pwsh -File Tools/Unity.ps1 Validate
+pwsh -File Tools/Unity.ps1 Build
+pwsh -File Tools/Unity.ps1 Smoke</code></pre>
+<p>Build 当前输出 <code>Builds/Windows-v0.2/FoundrySiege.exe</code>。Smoke 会实际运行玩家并检查物理与流程。保留旧交付包，记录每次修改及验证结果；源码、JSON、对应 .meta 进入 Git，Library、Logs、Builds 等生成内容保持忽略。</p>
+<p class="small">此次教程只新增文档与原始截图，未重新构建游戏。实际做了材质预览、基础试射、正常主菜单／练习入口查看和 Editor Validate；正式关卡与能力 JSON 未修改。</p>
+</section>
+<section id="first"><h2><span class="step">12</span>第一次练习：做一根更脆的前柱</h2>
+<div class="exercise"><strong>目标：</strong>完成一次“改地图 → 保存 → 试射 → 重载确认”的闭环，观察单个材质改动。</div>
+<ol><li>打开 FoundryDemo，Load JSON... 载入 C01。</li><li>选中 front-post，先记住 Position <code>(1,−2.75,0)</code>、Part Id <code>wood-post</code>。</li><li>执行 Material → Glass defaults，确认只有前柱改变，后柱仍是木材。</li><li>在 Assets/Content 下创建 Drafts 文件夹，执行 Save preview JSON as...，保存 <code>Drafts/C01-test.json</code>。内部 id 保留 C01 即可用于这个单关实验。</li><li>执行 Reset and test saved JSON，用同样的角度和档位试射，观察前柱破坏与倒塌。</li><li>停止 Play，再 Load 刚才的实验 JSON，确认玻璃前柱还在；这证明保存的是初始地图数据。</li><li>重新载入正式 C01，比较两种地图。之后再尝试修改实验副本的 hitPoints，每次只改一个参数。</li></ol>
+<p>下一次可以练习 <code>launch.maxSpeed: 20 → 22</code> 对三档弹道的影响，或在 RunConfiguration 中调整 <code>split.spreadAngle</code> 后进入 P01 比较分流宽度。后者是共用参数，会同时影响其他关卡，应保留原值并记录实验。</p>
+</section>
+<section id="troubleshoot"><h2>遇到问题时，先看这里</h2>
+<div class="table-wrap"><table><thead><tr><th>现象</th><th>处理方式</th></tr></thead><tbody>
+<tr><td>Scene 里没有塔</td><td>打开 FoundryDemo 后，Load JSON... 载入 C01。基础场景只有相机和控制器是正常的。</td></tr>
+<tr><td>移动过了，试射还是旧位置</td><td>先 Save preview JSON。试射从磁盘重载，未保存预览不会参与。</td></tr>
+<tr><td>复制物体后保存报重复 ID</td><td>改 Level Object Marker 的 Object Id；仅改 Hierarchy 名称不够。</td></tr>
+<tr><td>改 Collider、Scale、刚体后不能保存</td><td>恢复这些手改属性，在 JSON 的 parts 中改尺寸和物理值，再重新 Load。预览只支持 schema 可完整表达的改动。</td></tr>
+<tr><td>外部改过 JSON，Unity 提示冲突</td><td>先保留需要的草稿，再 Load 外部最新文件，或另存草稿。旧预览不能直接覆盖外部新文件。</td></tr>
+<tr><td>保存 JSON 后解析失败</td><td>查看 Console 的字段路径。保留所有必填字段；数字不加引号；布尔值写 true/false；禁止注释、尾逗号、重名字段和拼错字段。</td></tr>
+<tr><td>只有木柱变色，耐久没变</td><td>仅改 material 不会重设其他数字。想整套切换，用 Material → 对应 defaults，或显式填写其他参数。</td></tr>
+<tr><td>试射没有分裂／冲刺</td><td>Reset and test saved JSON 是无能力基础试射。停止后正常 Play，从练习或正式入口选主动。</td></tr>
+<tr><td>塔一开场就滑动或倒塌</td><td>检查穿插、接触面、重心、质量和摩擦。几何校验通过之后，仍需反复进入／重试观察实际物理。</td></tr>
+<tr><td>新增目标后数量没变</td><td>确认放置对象的 partId 指向 kind=1 的零件、已保存且重载。目标数从实际对象生成。</td></tr>
+<tr><td>改完工程，旧 exe 没变化</td><td>重新 Validate、Build、Smoke，再运行新输出；当前没有外部 JSON 热加载。</td></tr>
+</tbody></table></div>
+</section>
+<footer>依据：当前工程 Assets/Content、Configuration、Core、Combat 与 LevelAuthoring 实现，以及 Docs/LevelConfiguration.md。运行源码基线 4aa2a15；教程制作前交付记录 474d916。截图来自实际 Unity／Cursor 窗口，未合成或修改画面。点击图片可放大；离线查看时保留本 HTML 与 images 文件夹的相对位置。</footer>
+</main></div>
+<dialog id="viewer" aria-label="截图放大查看"><button type="button" id="close-viewer">关闭 · Esc</button><img id="full-image" alt=""><p id="full-caption"></p></dialog>
+<script>
+const viewer=document.getElementById('viewer');
+document.querySelectorAll('figure a').forEach(link=>link.addEventListener('click',event=>{if(typeof viewer.showModal!=='function')return;event.preventDefault();const img=link.querySelector('img');document.getElementById('full-image').src=link.getAttribute('href');document.getElementById('full-image').alt=img.alt;document.getElementById('full-caption').textContent=link.parentElement.querySelector('figcaption').textContent;viewer.showModal();}));
+document.getElementById('close-viewer').addEventListener('click',()=>viewer.close());
+viewer.addEventListener('click',event=>{if(event.target===viewer)viewer.close();});
+</script>
+</body>
+</html>

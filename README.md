@@ -42,4 +42,6 @@ pwsh -File Tools/Unity.ps1 Smoke
 
 Unity 菜单 `Siege Demo/Level` 提供载入、保存、材质预设、校验和单关基础物理试射。先保存作者数据再试射，Play 中禁止写回倒塌现场。能力组合从正常主菜单进入练习验证。详细字段及 AI 编辑流程见 [LevelConfiguration](Docs/LevelConfiguration.md)。
 
+首次配置可打开[地图与参数截图教程](Docs/Tutorial/地图与参数截图教程.html)：17 张实际界面截图，覆盖地图摆放、材质预设、保存与试射、发射和物理参数、两主动七被动及练习构筑。下载后用浏览器打开 HTML，并保留旁边的 `images` 文件夹。
+
 配置作为 TextAsset 编入玩家包，修改后需重新 Validate、Build；包内 Reference JSON 仅供参考，不是热加载入口。程序化工业画面和中文 HUD 已接入；正式音效、跨程序续局、任意切割和游戏内编辑器未包含。
